@@ -3,21 +3,21 @@
 
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Shrine.Button.TextButton"
-        android:id="@+id/featured"
+        android:id="@+id/in_main"
         android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimary"
-        android:text="TESTE"
+        android:textColor="@color/cpb_white"
+        android:text="Main"
         android:focusable="true" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/vg_products"
+        android:id="@+id/in_notes"
         style="@style/Widget.Shrine.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimary"
-        android:text="TESTE" />
+        android:textColor="@color/cpb_white"
+        android:text="Notes" />
 
     <View
         android:layout_width="56dp"
@@ -26,11 +26,19 @@
         android:background="?android:attr/textColorPrimary" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/vg_profile"
+        android:id="@+id/in_login"
         style="@style/Widget.Shrine.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorPrimary"
-        android:text="TESTE" />
+        android:textColor="@color/cpb_white"
+        android:text="login" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/in_logout"
+        style="@style/Widget.Shrine.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/cpb_white"
+        android:text="logout" />
 
 </merge>

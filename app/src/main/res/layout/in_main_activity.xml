@@ -34,8 +34,8 @@
             android:paddingRight="12dp"
             app:contentInsetStart="0dp"
             app:navigationIcon="@drawable/ic_collapse_holo_light"
-            app:titleTextColor="@color/colorPrimary"
-            app:title="VeggieYou" />
+            app:titleTextColor="@color/cpb_white"
+            app:title="App titulo" />
 
     </com.google.android.material.appbar.AppBarLayout>
 </FrameLayout>

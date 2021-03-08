@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/refresh_home"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+
+        tools:context=".Fragment.HomeFragment">
+
+        <include layout="@layout/in_main_activity" />
+
+       <!-- <androidx.core.widget.NestedScrollView
+            android:id="@+id/product_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp"
+            android:elevation="8dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:weightSum="1">
+                    <include layout="@layout/map" />
+                </LinearLayout>
+
+
+
+            </RelativeLayout>
+
+        </androidx.core.widget.NestedScrollView>-->
+        <RelativeLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp"
+            android:elevation="8dp"
+            android:id="@+id/map_grid"
+            android:orientation="vertical">
+
+            <com.github.florent37.shapeofview.shapes.CutCornerView
+                android:layout_width="50dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_height="35dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:background="@color/colorPrimary"
+                android:elevation="8dp"
+                android:textAlignment="center"
+                app:shape_cutCorner_bottomLeftSize="0dp"
+                app:shape_cutCorner_bottomRightSize="50dp"
+                app:shape_cutCorner_topLeftSize="0dp"
+                android:outlineSpotShadowColor="@color/colorPrimary"
+                android:outlineAmbientShadowColor="@color/colorPrimary"
+                app:shape_cutCorner_topRightSize="0dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+
+                <include layout="@layout/map" />
+            </LinearLayout>
+
+            <!--<LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true">
+
+                <com.kusu.loadingbutton.LoadingButton
+                    android:id="@+id/call_trash"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textSize="20dp"
+                    android:text="@string/btn_call_trash"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    app:lb_buttonColor="@color/estrela"
+                    app:lb_cornerRadius="0dp"
+                    app:lb_isCircular="false"
+                    app:lb_isShadowEnable="false"
+                    app:lb_shadowHeight="0dp" />
+
+
+            </LinearLayout>-->
+
+        </RelativeLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:id="@+id/call_trash"
+            style="@style/ButtonCornerLeftTop"
+            android:layout_width="70dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_height="60dp"
+            app:iconSize="30dp"
+            android:paddingLeft="25dp"
+            android:elevation="8dp"
+            android:layout_gravity="end|bottom"
+            app:strokeColor="@color/colorPrimaryDark" />
+
+        <!--<com.google.android.material.button.MaterialButton
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:id="@+id/none"
+            style="@style/ButtonCornerRightBottom"
+            android:layout_width="70dp"
+            android:backgroundTint="@color/cpb_white"
+            android:layout_height="60dp"
+            app:iconSize="30dp"
+            android:layout_marginTop="45dp"
+            android:paddingLeft="25dp"
+            android:elevation="8dp"
+
+            android:layout_gravity="top|start"
+            app:strokeColor="@color/colorPrimary" />-->
+
+      <!--  <FrameLayout
+            android:elevation="9dp"
+            android:visibility="visible"
+            android:id="@+id/progress_bar_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            tools:context=".ProductGridFragment">
+
+            <ProgressBar
+                android:background="@color/transparent"
+                android:backgroundTint="@color/transparent"
+                android:id="@+id/progress_bar"
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="visible" />
+
+        </FrameLayout>-->
+
+    </FrameLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

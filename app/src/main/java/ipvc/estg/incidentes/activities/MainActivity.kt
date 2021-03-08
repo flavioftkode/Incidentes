@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ipvc.estg.incidentes.R
+import ipvc.estg.incidentes.fragments.HomeFragment
 import ipvc.estg.incidentes.fragments.LoginFragment
 import ipvc.estg.incidentes.navigation.NavigationHost
 
@@ -30,7 +31,7 @@ class MainActivity : AppCompatActivity(), NavigationHost {
         }else if (savedInstanceState == null) {
             supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.container, LoginFragment())
+                    .add(R.id.container, HomeFragment())
                     .commit()
         }
     }
@@ -90,7 +91,7 @@ class MainActivity : AppCompatActivity(), NavigationHost {
         transaction.replace(R.id.container, fragment).commit()
     }
 
-    fun getRememberMe(): String? {
+    override fun getRememberMe(): String? {
         val sharedPref: SharedPreferences = this.getSharedPreferences("REMEMBER", Context.MODE_PRIVATE)
         return sharedPref.getString("username", null)
     }

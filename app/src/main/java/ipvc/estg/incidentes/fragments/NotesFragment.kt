@@ -9,7 +9,7 @@ import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.navigation.NavigationHost
 import kotlinx.android.synthetic.main.in_login_fragment.view.*
 
-class LoginFragment : Fragment() {
+class NotesFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -29,7 +29,7 @@ class LoginFragment : Fragment() {
         }
 
         view!!.close_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(LoginFragment(), true,false)
+            (activity as NavigationHost).navigateTo(NotesFragment(), true,false)
         }
     }
 }

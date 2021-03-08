@@ -23,4 +23,6 @@ interface NavigationHost {
     fun logout()
 
     fun paymentEnd()
+
+    fun getRememberMe(): String?
 }
