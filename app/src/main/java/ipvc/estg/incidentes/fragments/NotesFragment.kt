@@ -15,7 +15,7 @@ class NotesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.in_login_fragment, container, false)
+        val view = inflater.inflate(R.layout.in_notes_fragment, container, false)
 
         setClickListeners(view)
 
@@ -24,12 +24,5 @@ class NotesFragment : Fragment() {
     }
 
     private fun setClickListeners(view: View?) {
-        view!!.close_login.setNavigationOnClickListener{
-            activity?.onBackPressed();
-        }
-
-        view!!.close_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(NotesFragment(), true,false)
-        }
     }
 }
