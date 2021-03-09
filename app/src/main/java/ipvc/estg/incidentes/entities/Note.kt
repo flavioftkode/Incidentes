@@ -13,5 +13,6 @@ class Note(
     @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "date") val date: String,
     @ColumnInfo(name = "hour") val hour: String,
-    @ColumnInfo(name = "priority") val priority: Int
+    @ColumnInfo(name = "color") val color: String = "#FFFFFF",
+    @ColumnInfo(name = "colorId") val colorId: Int = 0,
 )

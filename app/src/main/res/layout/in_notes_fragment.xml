@@ -113,7 +113,7 @@
         </FrameLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/cart"
+            android:id="@+id/create_note"
             style="@style/ButtonCornerLeftTop"
             android:layout_width="wrap_content"
             android:layout_height="60dp"

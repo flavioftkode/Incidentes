@@ -45,6 +45,10 @@
 
         </androidx.core.widget.NestedScrollView>-->
         <RelativeLayout
+            android:outlineSpotShadowColor="@color/transparent"
+            android:outlineAmbientShadowColor="@color/transparent"
+            android:background="@color/cpb_grey"
+            android:backgroundTint="@color/cpb_grey"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="56dp"
@@ -142,7 +146,7 @@
             android:background="@color/cpb_white"
             android:backgroundTint="@color/cpb_white"
             android:elevation="9dp"
-            android:visibility="visible"
+            android:visibility="gone"
             android:id="@+id/map_loading"
             android:layout_marginTop="55dp"
             android:layout_width="match_parent"

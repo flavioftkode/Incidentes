@@ -185,7 +185,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         // Set up the tool bar
         setToolbar(view);
 
-        map_loading?.visibility = View.VISIBLE;
+       /* map_loading?.visibility = View.GONE;*/
         if (!isLocationEnabled(context)) {
             promptTurnGPS()
         }
@@ -270,7 +270,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
             rlp.setMargins(left, top, right, bottom)
             view!!.layoutParams = rlp
         } catch (ex: java.lang.Exception) {
-            Log.e("TAG", "moveView() - failed: " + ex.localizedMessage)
             ex.printStackTrace()
         }
     }
@@ -295,7 +294,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-        map_loading.visibility = View.VISIBLE;
+        /*map_loading.visibility = View.VISIBLE;*/
         activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
         if (mMap != null) {
             mMap!!.clear()
@@ -342,10 +341,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private fun setClickListeners(view: View?) {
         btnTrash!!.setOnClickListener(this)
         view!!.in_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(LoginFragment(),
-                addToBackstack = true,
-                animate = true
-            )
+            (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
         }
 
         view.in_logout.setOnClickListener {
@@ -353,10 +349,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
 
         view.in_notes.setOnClickListener {
-            (activity as NavigationHost).navigateTo(NotesFragment(),
-                addToBackstack = false,
-                animate = true
-            )
+            (activity as NavigationHost).navigateTo(NotesFragment(), addToBackstack = false, animate = true)
         }
     }
 
@@ -423,7 +416,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun goToLogin() {
         /*startActivity(Intent(context, LoginActivity::class.java))*/
-        (activity as NavigationHost).navigateTo(LoginFragment(), true, false)
+        (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
     }
 
     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
@@ -528,7 +521,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         }
                     })
 
-                    map_loading.visibility = View.GONE;
+                    /*map_loading.visibility = View.GONE;*/
                 }
             })
         }

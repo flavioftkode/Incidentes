@@ -28,7 +28,7 @@ import java.util.*
 
 
 class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelperListener,
-    NotesAdapter.NotesAdapterListener {
+    NotesAdapter.NotesAdapterListener  {
 
     private var mAdapter: NotesAdapter? = null
     private var notesList: MutableList<Note> = ArrayList<Note>()
@@ -50,16 +50,13 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
         setToolbar(view)
         setRecycleView(view)
         setAdapter()
-
-
-        /*view.recycler_loading.visibility = View.GONE;*/
         return view
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.search -> {
-
                 true
             }
             else -> false
@@ -96,27 +93,15 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
     }
 
     private fun setAdapter() {
-
         noteViewModel = ViewModelProvider(this).get(NotesViewModel::class.java)
-
-
-
         noteViewModel.allNotes.observe(viewLifecycleOwner, Observer { notes ->
-            //Log.e("notes", notesList[0].title.toString())
-            // Update the cached copy of the words in the adapter.
-            /*notes?.let { mAdapter!!.setNotes(it) }*/
             notesList = notes as MutableList<Note>
-
             mAdapter = context?.let { NotesAdapter(notesList, this, it) }
             mAdapter!!.setHasStableIds(true)
 
             mAdapter!!.notifyItemRangeInserted(0, notesList.size - 1)
             recyclerView!!.adapter = mAdapter
         })
-
-      /*  mAdapter = context?.let { NotesAdapter(notesList, this, it) }
-        mAdapter!!.setHasStableIds(true)*/
-
     }
 
     class ClickListener {
@@ -125,11 +110,13 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
 
     private fun setClickListeners(view: View?) {
         view!!.in_main.setOnClickListener{
-            (activity as NavigationHost).navigateTo(
-                HomeFragment(),
-                addToBackstack = false,
-                animate = true
-            )
+            (activity as NavigationHost).navigateTo(HomeFragment(), addToBackstack = false, animate = true)
+        }
+
+        view!!.create_note.setOnClickListener{
+            val bundle = Bundle()
+            bundle.putString("destination", "create")
+            (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true,"note",bundle)
         }
     }
 
@@ -149,6 +136,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+        menu.clear();
         super.onCreateOptionsMenu(menu, menuInflater)
 
         menuInflater.inflate(R.menu.in_notes_toolbar, menu)
@@ -192,6 +180,14 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
     }
 
     override fun onNoteSelected(note: Note?) {
-        Log.e("NOTE", note!!.title)
+        val bundle = Bundle()
+        bundle.putString("destination", "view")
+        bundle.putInt("id", note!!.id!!)
+        (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true,"note",bundle)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activity!!.invalidateOptionsMenu();
     }
 }

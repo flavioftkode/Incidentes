@@ -2,6 +2,7 @@ package ipvc.estg.incidentes.navigation
 
 import android.os.Bundle
 import android.view.View
+import android.webkit.WebStorage
 import androidx.fragment.app.Fragment
 
 
@@ -14,15 +15,15 @@ interface NavigationHost {
      * Trigger a navigation to the specified fragment, optionally adding a transaction to the back
      * stack to make this navigation reversible.
      */
-    fun navigateTo(fragment: Fragment, addToBackstack: Boolean, animate: Boolean)
+    fun navigateTo(fragment: Fragment, addToBackstack: Boolean, animate: Boolean,tag:String = "")
 
-    fun navigateToWithData(fragment: Fragment, addToBackstack: Boolean, animate: Boolean,data: Bundle)
+    fun navigateToWithData(fragment: Fragment, addToBackstack: Boolean, animate: Boolean,tag:String = "",data: Bundle)
 
     fun navigateToShared(fragment: Fragment, addToBackstack: Boolean, animate: Boolean, view: View?)
 
     fun logout()
 
-    fun paymentEnd()
-
     fun getRememberMe(): String?
+
+    fun showColors(selectedColor:Int?)
 }

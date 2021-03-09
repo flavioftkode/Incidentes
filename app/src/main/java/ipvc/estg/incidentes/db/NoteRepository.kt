@@ -22,6 +22,14 @@ class NoteRepository(private val notesDao: NotesDao) {
         notesDao.deleteById(id)
     }
 
+    fun getNoteById(id: Int): LiveData<Note> {
+        return notesDao.getNoteById(id)
+    }
+
+    suspend fun updateNote(id: Int,title:String,description:String,color: String,colorId:Int) {
+        notesDao.updateNote(id,title,description,color,colorId)
+    }
+
    /* fun getCitiesByCountry(country: String): LiveData<List<Note>> {
         return notesDao.getCitiesByCountry(country)
     }
