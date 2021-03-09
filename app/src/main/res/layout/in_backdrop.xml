@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.button.MaterialButton
         style="@style/Widget.Shrine.Button.TextButton"
@@ -8,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/cpb_white"
-        android:text="Main"
+        android:text="@string/navigation_map"
         android:focusable="true" />
 
     <com.google.android.material.button.MaterialButton
@@ -17,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/cpb_white"
-        android:text="Notes" />
+        android:text="@string/navigation_notes" />
 
     <View
         android:layout_width="56dp"
@@ -31,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/cpb_white"
-        android:text="login" />
+        android:text="@string/navigation_login" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/in_logout"
@@ -39,6 +40,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/cpb_white"
-        android:text="logout" />
+        android:text="@string/navigation_logout" />
 
 </merge>

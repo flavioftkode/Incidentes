@@ -27,9 +27,5 @@ class LoginFragment : Fragment() {
         view!!.close_login.setNavigationOnClickListener{
             activity?.onBackPressed();
         }
-
-        view!!.close_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(LoginFragment(), true,false)
-        }
     }
 }

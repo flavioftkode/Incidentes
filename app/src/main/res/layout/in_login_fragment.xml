@@ -45,11 +45,11 @@
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="200dp"
+                android:layout_height="110dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
-                app:srcCompat="@drawable/ic_launcher_background"
-                android:layout_marginBottom="5dp" />
+                app:srcCompat="@drawable/ic_logo"
+                android:layout_marginBottom="15dp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/username_text_input"

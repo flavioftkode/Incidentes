@@ -45,7 +45,6 @@
 
         </androidx.core.widget.NestedScrollView>-->
         <RelativeLayout
-            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="56dp"
@@ -108,17 +107,19 @@
         </RelativeLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
             android:id="@+id/call_trash"
             style="@style/ButtonCornerLeftTop"
-            android:layout_width="70dp"
-            android:backgroundTint="@color/colorPrimary"
+            android:layout_width="wrap_content"
             android:layout_height="60dp"
-            app:iconSize="30dp"
-            android:paddingLeft="25dp"
-            android:elevation="8dp"
             android:layout_gravity="end|bottom"
+            android:backgroundTint="@color/colorPrimary"
+            android:elevation="8dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingLeft="25dp"
+            android:text="@string/report_incident"
+            android:textColor="@color/cpb_white"
+            app:iconSize="30dp"
             app:strokeColor="@color/colorPrimaryDark" />
 
         <!--<com.google.android.material.button.MaterialButton
@@ -137,10 +138,13 @@
             android:layout_gravity="top|start"
             app:strokeColor="@color/colorPrimary" />-->
 
-      <!--  <FrameLayout
+        <FrameLayout
+            android:background="@color/cpb_white"
+            android:backgroundTint="@color/cpb_white"
             android:elevation="9dp"
             android:visibility="visible"
-            android:id="@+id/progress_bar_frame"
+            android:id="@+id/map_loading"
+            android:layout_marginTop="55dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
@@ -148,8 +152,8 @@
             tools:context=".ProductGridFragment">
 
             <ProgressBar
-                android:background="@color/transparent"
-                android:backgroundTint="@color/transparent"
+                android:background="@color/cpb_white"
+                android:backgroundTint="@color/cpb_white"
                 android:id="@+id/progress_bar"
                 style="@style/Base.Widget.AppCompat.ProgressBar"
                 android:layout_width="match_parent"
@@ -158,7 +162,7 @@
                 android:indeterminate="true"
                 android:visibility="visible" />
 
-        </FrameLayout>-->
+        </FrameLayout>
 
     </FrameLayout>
 

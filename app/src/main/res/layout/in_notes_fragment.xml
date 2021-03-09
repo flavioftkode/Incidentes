@@ -1,54 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swiperefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/cpb_white"
-    tools:context="fragments.NotesFragment">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="0dp"
-        android:paddingTop="0dp">
+        tools:context=".ProductGridFragment">
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:elevation="0dp">
 
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/close_notes"
-                style="@style/Widget.Shrine.Toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:backgroundTint="@color/white"
-                android:paddingStart="12dp"
-                android:paddingLeft="12dp"
-                android:paddingEnd="12dp"
-                android:paddingRight="12dp"
-                app:contentInsetStart="0dp"
-                app:navigationIcon="@drawable/in_close"
-                app:title="Notes" />
+        <include layout="@layout/in_main_activity" />
 
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <LinearLayout
-            android:padding="25dp"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <com.github.florent37.shapeofview.shapes.CutCornerView
+                android:layout_width="50dp"
+                android:layout_marginTop="55dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:layout_height="35dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:background="@color/colorPrimary"
+                android:elevation="10dp"
+                android:textAlignment="center"
+                app:shape_cutCorner_bottomLeftSize="0dp"
+                app:shape_cutCorner_bottomRightSize="50dp"
+                app:shape_cutCorner_topLeftSize="0dp"
+                android:outlineSpotShadowColor="@color/colorPrimary"
+                android:outlineAmbientShadowColor="@color/colorPrimary"
+                app:shape_cutCorner_topRightSize="0dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="55dp"
+                android:elevation="8dp"
+                android:id="@+id/notes_grid"
+                android:orientation="vertical">
+
+                <androidx.core.widget.NestedScrollView
+
+                    android:requiresFadingEdge="horizontal|vertical"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:background="@color/white"
+                    android:backgroundTint="@color/white"
+                    app:elevation="200dp"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                    <RelativeLayout
+                        app:elevation="1dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.github.florent37.shapeofview.shapes.CutCornerView
+                            android:layout_width="50dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:layout_height="35dp"
+                            android:layout_marginBottom="20dp"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:background="@color/colorPrimary"
+                            android:elevation="8dp"
+                            android:textAlignment="center"
+                            app:shape_cutCorner_bottomLeftSize="0dp"
+                            app:shape_cutCorner_bottomRightSize="50dp"
+                            app:shape_cutCorner_topLeftSize="0dp"
+                            android:outlineSpotShadowColor="@color/colorPrimary"
+                            android:outlineAmbientShadowColor="@color/colorPrimary"
+                            app:shape_cutCorner_topRightSize="0dp" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            app:elevation="1dp"
+                            android:clipToPadding="true"
+                            android:overScrollMode="always"
+                            android:visibility="visible"
+                            android:id="@+id/recycler_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical" />
+
+                        <TextView
+                            android:paddingTop="20dp"
+                            android:textSize="17sp"
+                            android:gravity="center"
+                            android:id="@+id/no_products"
+                            android:visibility="gone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                    </RelativeLayout>
 
 
+                </androidx.core.widget.NestedScrollView>
+
+            </RelativeLayout>
 
 
-        </LinearLayout>
+        </FrameLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cart"
+            style="@style/ButtonCornerLeftTop"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="end|bottom"
+            android:backgroundTint="@color/colorPrimary"
+            android:elevation="8dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingStart="25dp"
+            app:iconSize="30dp"
+            android:text="@string/create_note"
+            android:textColor="@color/cpb_white"
+            app:iconTint="@color/white"
+            app:strokeColor="@color/colorPrimary" />
 
+        <FrameLayout
+            android:visibility="gone"
+            android:id="@+id/recycler_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            tools:context=".ProductGridFragment">
 
-    </LinearLayout>
-</ScrollView>
+            <ProgressBar
+                android:background="@color/transparent"
+                android:backgroundTint="@color/transparent"
+                android:id="@+id/progress_bar"
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="visible" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

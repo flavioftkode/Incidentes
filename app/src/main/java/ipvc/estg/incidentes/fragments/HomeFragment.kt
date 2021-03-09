@@ -35,10 +35,12 @@ import ipvc.estg.incidentes.listeners.NavigationIconClickListener
 import ipvc.estg.incidentes.navigation.NavigationHost
 import ipvc.estg.incidentes.services.GPSTracker
 import kotlinx.android.synthetic.main.in_backdrop.view.*
+import kotlinx.android.synthetic.main.in_home_fragment.*
 import kotlinx.android.synthetic.main.in_home_fragment.view.*
 import kotlinx.android.synthetic.main.in_main_activity.view.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.system.exitProcess
 
 
 /**
@@ -176,24 +178,14 @@ class HomeFragment : Fragment(), View.OnClickListener {
     ): View? {
         _token = authenticationToken
         _userId = authenticationUserId
-        //root = inflater.inflate(R.layout.in_home_fragment, container, false)
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
-        url = "getString(R.string.main_url) + getString(R.string.url_geslixo_server_api) + getString(R.string.url_get_incidente)"
-        /*(context as AppCompatActivity?)!!.supportActionBar!!.setTitle(R.string.app_name)*/
-        // Set up the tool bar
-        (activity as AppCompatActivity).setSupportActionBar(view.app_bar)
-        view.app_bar.setNavigationOnClickListener(
-            NavigationIconClickListener(
-                activity!!, view.map_grid,
-                AccelerateDecelerateInterpolator(),
-                ContextCompat.getDrawable(
-                    context!!,
-                    R.drawable.ic_collapse_holo_light
-                ), // Menu open icon
-                ContextCompat.getDrawable(context!!, R.drawable.ic_collapse_holo_light)
-            )
-        ) // Menu close icon
 
+        //url = "getString(R.string.main_url) + getString(R.string.url_geslixo_server_api) + getString(R.string.url_get_incidente)"
+
+        // Set up the tool bar
+        setToolbar(view);
+
+        map_loading?.visibility = View.VISIBLE;
         if (!isLocationEnabled(context)) {
             promptTurnGPS()
         }
@@ -222,6 +214,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
             e.printStackTrace()
         }
         return view
+    }
+
+    private fun setToolbar(view:View?){
+        (activity as AppCompatActivity).setSupportActionBar(view!!.app_bar)
+        (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.home)
+        view.app_bar.setNavigationOnClickListener(
+            NavigationIconClickListener(
+                activity!!, view.map_grid,
+                AccelerateDecelerateInterpolator(),
+                ContextCompat.getDrawable(context!!, R.drawable.in_menu
+                ), // Menu open icon
+                ContextCompat.getDrawable(context!!, R.drawable.in_close)
+            )
+        ) // Menu close icon
     }
 
     private fun moveView(
@@ -276,11 +282,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
     ) {
         when (requestCode) {
             1 -> {
-                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     map
                 } else {
                     activity!!.finish()
-                    System.exit(0)
+                    exitProcess(0)
                 }
                 return
             }
@@ -289,6 +295,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
+        map_loading.visibility = View.VISIBLE;
         activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
         if (mMap != null) {
             mMap!!.clear()
@@ -335,7 +342,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private fun setClickListeners(view: View?) {
         btnTrash!!.setOnClickListener(this)
         view!!.in_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(LoginFragment(), true,false)
+            (activity as NavigationHost).navigateTo(LoginFragment(),
+                addToBackstack = true,
+                animate = true
+            )
         }
 
         view.in_logout.setOnClickListener {
@@ -343,7 +353,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
 
         view.in_notes.setOnClickListener {
-           /* (activity as NavigationHost).navigateTo(NotesFragment(), true,false)*/
+            (activity as NavigationHost).navigateTo(NotesFragment(),
+                addToBackstack = false,
+                animate = true
+            )
         }
     }
 
@@ -396,13 +409,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private val authenticationToken: String?
-        private get() {
+    private val authenticationToken: String? get() {
             val sharedPref = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
             return sharedPref.getString("token", null)
         }
-    private val authenticationUserId: String?
-        private get() {
+    private val authenticationUserId: String? get() {
             val sharedPref = context!!.getSharedPreferences(
                 "AUTHENTICATION",
                 Context.MODE_PRIVATE
@@ -418,7 +429,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
     private val map: // 3
             Unit
-        private get() {
+        get() {
             mMapView!!.getMapAsync(object : OnMapReadyCallback {
                 override fun onMapReady(googleMap: GoogleMap) {
                     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
@@ -445,13 +456,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         ) != PackageManager.PERMISSION_GRANTED
                     ) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
                         return
                     }
                     googleMap.isMyLocationEnabled = true
@@ -511,7 +515,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                                             dragLon
                                         )
                                     ).draggable(true)
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background))
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
                                 )
                                 mMap!!.animateCamera(
                                     CameraUpdateFactory.newLatLngZoom(
@@ -523,6 +527,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             }
                         }
                     })
+
+                    map_loading.visibility = View.GONE;
                 }
             })
         }
@@ -535,7 +541,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     private val myLocation: LatLng
-        private get() {
+        get() {
             gps = GPSTracker(context!!)
             return LatLng(gps!!.getLatitude(), gps!!.getLongitude())
         }
