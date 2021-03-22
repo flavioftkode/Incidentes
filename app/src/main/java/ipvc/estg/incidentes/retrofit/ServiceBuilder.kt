@@ -11,7 +11,6 @@ import java.security.AccessController.getContext
 object ServiceBuilder {
     private val client = OkHttpClient.Builder().build()
 
-
     private val retrofit = Retrofit.Builder()
         .baseUrl("http://192.168.1.103:8888")
         .addConverterFactory(GsonConverterFactory.create())
