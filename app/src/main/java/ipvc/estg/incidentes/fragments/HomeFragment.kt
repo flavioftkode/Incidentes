@@ -5,11 +5,13 @@ import android.R.attr.*
 import android.app.AlertDialog
 import android.content.*
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -30,16 +32,20 @@ import com.google.android.material.button.MaterialButton
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
 import ipvc.estg.incidentes.R
-import ipvc.estg.incidentes.constructors.MyMarker
+import ipvc.estg.incidentes.entities.MyMarker
 import ipvc.estg.incidentes.listeners.NavigationIconClickListener
 import ipvc.estg.incidentes.navigation.NavigationHost
+import ipvc.estg.incidentes.retrofit.EndPoints
+import ipvc.estg.incidentes.retrofit.ServiceBuilder
 import ipvc.estg.incidentes.services.GPSTracker
+import ipvc.estg.incidentes.services.MarkerClusterRenderer
 import kotlinx.android.synthetic.main.in_backdrop.view.*
-import kotlinx.android.synthetic.main.in_home_fragment.*
 import kotlinx.android.synthetic.main.in_home_fragment.view.*
+import kotlinx.android.synthetic.main.in_login_fragment.*
 import kotlinx.android.synthetic.main.in_main_activity.view.*
-import java.util.*
-import kotlin.collections.ArrayList
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import kotlin.system.exitProcess
 
 
@@ -170,7 +176,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         LatLng(38.6989299, -9.1759008),
         LatLng(38.6987916, -9.1759297)
     )
-    private val myMarkers: MutableList<MyMarker> = ArrayList<MyMarker>()
+    private var myMarkers: MutableList<MyMarker> = ArrayList<MyMarker>()
     var received = true
     var finished = false
     var progress = false
@@ -229,14 +235,15 @@ class HomeFragment : Fragment(), View.OnClickListener {
         return view
     }
 
-    private fun setToolbar(view:View?){
+    private fun setToolbar(view: View?){
         (activity as AppCompatActivity).setSupportActionBar(view!!.app_bar)
         (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.home)
         view.app_bar.setNavigationOnClickListener(
             NavigationIconClickListener(
                 activity!!, view.map_grid,
                 AccelerateDecelerateInterpolator(),
-                ContextCompat.getDrawable(context!!, R.drawable.in_menu
+                ContextCompat.getDrawable(
+                    context!!, R.drawable.in_menu
                 ), // Menu open icon
                 ContextCompat.getDrawable(context!!, R.drawable.in_close)
             )
@@ -357,12 +364,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
             if(logged!!){
                 (activity as NavigationHost).logout(HomeFragment())
             }else{
-                (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+                (activity as NavigationHost).navigateTo(
+                    LoginFragment(),
+                    addToBackstack = true,
+                    animate = true
+                )
             }
         }
 
         view.in_notes.setOnClickListener {
-            (activity as NavigationHost).navigateTo(NotesFragment(), addToBackstack = false, animate = true)
+            (activity as NavigationHost).navigateTo(
+                NotesFragment(),
+                addToBackstack = false,
+                animate = true
+            )
         }
     }
 
@@ -378,27 +393,30 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 Toast.makeText(context, "no login", Toast.LENGTH_SHORT).show()
                 goToLogin()
             } else {
+                val bundle = Bundle()
                 /*val intent = Intent(context, EventActivity::class.java)*/
                 if (mMarker != null) {
+                    bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
+                    bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
+                    bundle.putBoolean("mMarker", true)
+                    (activity as NavigationHost).navigateToWithData(EventFragment(), addToBackstack = true, animate = true, "event", bundle)
+
                    /* intent.putExtra("mMarker_lat", mMarker.getPosition().latitude)
                     intent.putExtra("mMarker_long", mMarker.getPosition().longitude)
                     intent.putExtra("mMarker", true)
                     startActivity(intent)*/
                 } else if (isLocationEnabled(context)) {
-                     //intent.putExtra("mMarker",false);
+                    bundle.putBoolean("mMarker", false)
                     if (mMap != null && PolyUtil.containsLocation(myLocation, hole, true)) {
                         myLocation
-                        mMarker = mMap!!.addMarker(
-                            MarkerOptions().position(myLocation).draggable(true)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
-                        )
+                        mMarker = mMap!!.addMarker(MarkerOptions().position(myLocation).draggable(true).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker)))
                         Toast.makeText(context, "placed"/*getString("placed")*/, Toast.LENGTH_LONG)
                             .show()
                     } else if (mMarker != null) {
-                        /*intent.putExtra("mMarker_lat", mMarker.getPosition().latitude)
-                        intent.putExtra("mMarker_long", mMarker.getPosition().longitude)
-                        intent.putExtra("mMarker", true)
-                        startActivity(intent)*/
+                        bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
+                        bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
+                        bundle.putBoolean("mMarker", true)
+                        (activity as NavigationHost).navigateToWithData(EventFragment(), addToBackstack = true, animate = true, "event", bundle)
                     } else {
                         Toast.makeText(
                             context,
@@ -430,7 +448,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun goToLogin() {
         /*startActivity(Intent(context, LoginActivity::class.java))*/
-        (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+        (activity as NavigationHost).navigateTo(
+            LoginFragment(),
+            addToBackstack = true,
+            animate = true
+        )
     }
 
     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
@@ -542,8 +564,95 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun setUpClusterManager() {
         if (_token != null && _userId != null && myMarkers.isEmpty()) {
-            /*val queue = Volley.newRequestQueue(context)
-            volleyService(queue)*/
+            val request = ServiceBuilder.buildService(EndPoints::class.java)
+            val call = request.getCluster()
+
+            call.enqueue(object : Callback<List<MyMarker>> {
+                override fun onResponse(
+                    call: Call<List<MyMarker>>?,
+                    response: Response<List<MyMarker>>?
+                ) {
+
+                    if (response!!.isSuccessful) {
+
+                        /*response.body().forEach {
+                            *//*Log.e("response",it.photo.toString())*//*
+                            //val decodedString: String = Base64.decode(it.photo?.toByteArray(charset("UTF-8")), Base64.DEFAULT).toString()
+
+                            *//*val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)*//*
+
+                            val myMarker = MyMarker(
+                                id = it.id,
+                                latitude = it.latitude,
+                                longitude = it.longitude,
+                                latLng = LatLng(it.latitude,it.longitude),
+                                status = 1,
+                                location = it.location,
+                                number = it.location,
+                                date = it.location,
+                                time = it.location,
+                                description = it.description,
+                                photo = decodedString,
+                                photo_finish = decodedString
+                            )
+
+                            //myMarkers.add(myMarker)
+                        }*/
+
+                        myMarkers = response.body() as MutableList<MyMarker>
+                        /*val myMarker = MyMarker(
+                            id= response.body().id,
+                            latLng = LatLng(2.2, 2.2),
+                            status = 1,
+                            location = response.body().location,
+                            number = response.body().location,
+                            date = response.body().location,
+                            time = response.body().location,
+                            description = response.body().description,
+                            photo = response.body().photo,
+                            photo_finish = response.body().photo
+                        )*/
+
+                        //myMarkers = response.body() as MutableList<MyMarker>
+
+                        clusterManager!!.renderer = MarkerClusterRenderer(
+                            context!!,
+                            mMap!!,
+                            clusterManager!!
+                        )
+                        mMap!!.setOnCameraIdleListener(clusterManager)
+                        clusterManager!!.clearItems()
+                        clusterManager!!.addItems(myMarkers) // 4
+                        clusterManager!!.cluster()
+                        (activity as NavigationHost).customToaster(
+                            response.toString(),
+                            "ic_error_small",
+                            Toast.LENGTH_LONG
+                        );
+                    } else {
+                        if (response.code() == 403 && response.message() == "login_fail") {
+                            username_text_input.error = getString(R.string.wrong_user_info)
+                            password_text_input.error = getString(R.string.wrong_user_info)
+                        } else {
+                            (activity as NavigationHost).customToaster(
+                                "fail resp",
+                                "ic_error_small",
+                                Toast.LENGTH_LONG
+                            );
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
+                    (activity as NavigationHost).customToaster(
+                        t!!.message.toString(),
+                        "ic_error_small",
+                        Toast.LENGTH_LONG
+                    );
+                    Log.e("responseerr", t!!.message.toString())
+                }
+
+            })
         }
     }
 

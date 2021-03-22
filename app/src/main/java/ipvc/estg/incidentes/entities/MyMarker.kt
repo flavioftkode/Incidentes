@@ -1,16 +1,13 @@
-package ipvc.estg.incidentes.constructors
+package ipvc.estg.incidentes.entities
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 
-/**
- *
- * Criado por Flávio Fernandes a 12/12/2019
- *
- */
 class MyMarker(// 2
     val id: Int,
     val latLng: LatLng,
+    val latitude: Double,
+    val longitude: Double,
     val status: Int,
     val location: String,
     val number: String,

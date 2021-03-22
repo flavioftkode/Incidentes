@@ -263,13 +263,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
         val bundle = Bundle()
         bundle.putString("destination", "view")
         bundle.putInt("id", note!!.id!!)
-        (activity as NavigationHost).navigateToWithData(
-            NoteFragment(),
-            addToBackstack = true,
-            animate = true,
-            "note",
-            bundle
-        )
+        (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true, "note", bundle)
     }
 
     override fun onResume() {

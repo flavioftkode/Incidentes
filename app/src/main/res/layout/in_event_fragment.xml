@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cpb_white"
+    tools:context="fragments.LoginFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:padding="0dp"
+        android:paddingTop="0dp">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="0dp">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/close_event"
+                style="@style/Widget.Shrine.Toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:backgroundTint="@color/white"
+                android:paddingStart="12dp"
+                android:paddingLeft="12dp"
+                android:paddingEnd="12dp"
+                android:paddingRight="12dp"
+                app:contentInsetStart="0dp"
+                app:navigationIcon="@drawable/in_close"
+                app:title="Login" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="24dp"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="image"
+                android:gravity="start"
+                android:layout_marginBottom="24dp"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+                android:id="@+id/no_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="no image"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone"
+                android:layout_gravity="center_horizontal"/>
+
+            <com.kusu.loadingbutton.LoadingButton
+                android:id="@+id/add_image"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:padding="12dp"
+                android:text="add image"
+                android:textColor="@color/Black"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                app:lb_loaderColor="@color/Black"
+                app:lb_buttonColor="@color/cpb_grey"
+                app:lb_isShadowEnable="false"
+                app:lb_isCircular="false"
+                app:lb_cornerRadius="5dp"
+                app:lb_shadowHeight="0dp"
+                android:textSize="16sp"/>
+
+            <ImageView
+                android:id="@+id/image_camera"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:contentDescription="login logo" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="location"
+                android:gravity="start"
+                android:layout_marginBottom="24dp"
+                android:layout_gravity="center_horizontal"/>
+
+            <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:id="@+id/map_lite"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                map:cameraZoom="5"
+                map:mapType="normal"
+                map:liteMode="true"/>
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:inputType="text|textMultiLine"
+                    android:lines="4"
+                    android:maxLines="10"
+                    android:minLines="4"
+                    android:hint="description"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+
+
+            <com.kusu.loadingbutton.LoadingButton
+                android:id="@+id/bnt_send"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:padding="12dp"
+                android:text="send"
+                android:textColor="@color/white"
+                android:textAllCaps="false"
+                app:lb_loaderColor="@color/Black"
+                app:lb_buttonColor="@color/colorPrimaryDark"
+                app:lb_isShadowEnable="false"
+                app:lb_isCircular="false"
+                app:lb_cornerRadius="5dp"
+                app:lb_shadowHeight="0dp"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+</ScrollView>
