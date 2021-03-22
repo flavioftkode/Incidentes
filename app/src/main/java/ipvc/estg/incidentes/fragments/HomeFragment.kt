@@ -645,12 +645,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
         queue.add(stringRequest)
     }*/
 
-
-    fun clearAuthentication() {
-        val settings = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
-        settings.edit().clear().apply()
-    }
-
     companion object {
         private var URL: String? = null
         var eventCounter = 0
