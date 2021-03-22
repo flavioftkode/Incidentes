@@ -46,8 +46,6 @@ class LoginFragment : Fragment() {
         val view = inflater.inflate(R.layout.in_login_fragment, container, false)
         declareItems(view)
         setClickListeners(view)
-
-
         return view
     }
 
