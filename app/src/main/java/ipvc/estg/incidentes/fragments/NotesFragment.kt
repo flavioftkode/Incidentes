@@ -42,13 +42,11 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        Toast.makeText(context, "create", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        Toast.makeText(context, "create view", Toast.LENGTH_SHORT).show()
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.in_notes_fragment, container, false)
 
@@ -277,7 +275,6 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
     override fun onResume() {
         super.onResume()
         activity!!.invalidateOptionsMenu();
-        Toast.makeText(context, "resume", Toast.LENGTH_SHORT).show()
         in_login.visibility = View.GONE
 
     }
