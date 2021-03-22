@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -21,31 +22,42 @@ import ipvc.estg.incidentes.listeners.RecyclerItemTouchHelper
 import ipvc.estg.incidentes.listeners.RecyclerTouchListener
 import ipvc.estg.incidentes.navigation.NavigationHost
 import ipvc.estg.incidentes.vmodel.NotesViewModel
+import kotlinx.android.synthetic.main.in_backdrop.*
 import kotlinx.android.synthetic.main.in_backdrop.view.*
 import kotlinx.android.synthetic.main.in_main_activity.view.*
 import kotlinx.android.synthetic.main.in_notes_fragment.view.*
 import java.util.*
 
 
-class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelperListener,
-    NotesAdapter.NotesAdapterListener  {
+class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, NotesAdapter.NotesAdapterListener  {
 
     private var mAdapter: NotesAdapter? = null
     private var notesList: MutableList<Note> = ArrayList<Note>()
     var mLayoutManager: RecyclerView.LayoutManager? = null
     private var recyclerView: RecyclerView? = null
     private lateinit var noteViewModel: NotesViewModel
+    var notification: String? = null
+    private var logged: Boolean? = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        Toast.makeText(context, "create", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
+        Toast.makeText(context, "create view", Toast.LENGTH_SHORT).show()
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.in_notes_fragment, container, false)
+
+        var bundle = this.arguments
+        if (bundle != null) {
+            notification  = bundle.getString("key")
+            this.arguments = null
+        }
+
         setClickListeners(view)
         setToolbar(view)
         setRecycleView(view)
@@ -56,7 +68,11 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.search -> {
+            R.id.notes_search -> {
+                true
+            }
+            R.id.notes_filter -> {
+                (activity as NavigationHost).showFilters();
                 true
             }
             else -> false
@@ -98,9 +114,24 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
             notesList = notes as MutableList<Note>
             mAdapter = context?.let { NotesAdapter(notesList, this, it) }
             mAdapter!!.setHasStableIds(true)
-
             mAdapter!!.notifyItemRangeInserted(0, notesList.size - 1)
             recyclerView!!.adapter = mAdapter
+
+            if (notification != null) {
+                val note = mAdapter!!.getItemById(notification!!.toInt())
+                val bundle = Bundle()
+                bundle.putString("destination", "view")
+                bundle.putInt("id", note.id!!)
+                (activity as NavigationHost).navigateToWithData(
+                    NoteFragment(),
+                    addToBackstack = true,
+                    animate = true,
+                    "note",
+                    bundle
+                )
+                noteViewModel.setNotification(note.id, false)
+                notification = null
+            }
         })
     }
 
@@ -110,19 +141,50 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
 
     private fun setClickListeners(view: View?) {
         view!!.in_main.setOnClickListener{
-            (activity as NavigationHost).navigateTo(HomeFragment(), addToBackstack = false, animate = true)
+            (activity as NavigationHost).navigateTo(
+                HomeFragment(),
+                addToBackstack = false,
+                animate = true
+            )
         }
 
         view!!.create_note.setOnClickListener{
             val bundle = Bundle()
             bundle.putString("destination", "create")
-            (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true,"note",bundle)
+            (activity as NavigationHost).navigateToWithData(
+                NoteFragment(),
+                addToBackstack = true,
+                animate = true,
+                "note",
+                bundle
+            )
         }
+
+        view!!.in_auth.setOnClickListener {
+            if(logged!!){
+                (activity as NavigationHost).logout(NotesFragment())
+            }else{
+                (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+            }
+        }
+
+        /*view!!.in_login.setOnClickListener {
+            (activity as NavigationHost).navigateTo(
+                LoginFragment(),
+                addToBackstack = true,
+                animate = true
+            )
+        }
+
+        view.in_logout.setOnClickListener {
+            (activity as NavigationHost).logout()
+        }*/
     }
 
     private fun setToolbar(view: View?){
         (activity as AppCompatActivity).setSupportActionBar(view!!.app_bar)
         (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.notes)
+
         view.app_bar.setNavigationOnClickListener(
             NavigationIconClickListener(
                 activity!!, view.notes_grid,
@@ -132,7 +194,15 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
                 ), // Menu open icon
                 ContextCompat.getDrawable(context!!, R.drawable.in_close)
             )
-        ) // Menu close icon
+        )
+
+        logged = (activity as NavigationHost).getLoggedUser()
+
+        if(logged!!){
+            view.in_auth.text = getString(R.string.navigation_logout)
+        }else{
+            view.in_auth.text = getString(R.string.navigation_login)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -141,11 +211,13 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
 
         menuInflater.inflate(R.menu.in_notes_toolbar, menu)
 
-        val searchView = SearchView(((activity as AppCompatActivity?)!!.supportActionBar?.themedContext ?: context)!!)
+        val searchView = SearchView(
+            ((activity as AppCompatActivity?)!!.supportActionBar?.themedContext ?: context)!!
+        )
         val searchEditText: EditText = searchView.findViewById<View>(R.id.search_src_text) as EditText
         searchEditText.setTextColor(ContextCompat.getColor(context!!, R.color.cpb_white))
         searchEditText.setHintTextColor(ContextCompat.getColor(context!!, R.color.cpb_white))
-        menu.findItem(R.id.search).apply {
+        menu.findItem(R.id.notes_search).apply {
             setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW or MenuItem.SHOW_AS_ACTION_IF_ROOM)
             actionView = searchView
         }
@@ -161,7 +233,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
                 return false
             }
         })
-        searchView.setOnClickListener { view -> }
+        searchView.setOnClickListener { }
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder?, direction: Int, position: Int) {
@@ -169,11 +241,21 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
             val note = mAdapter!!.getItem(position);
             noteViewModel.deleteById(mAdapter!!.getItem(position).id!!)
             mAdapter!!.removeItem(position)
+            if(note.notification){
+                (activity as NavigationHost).cancelNotification(note.id!!);
+            }
             Snackbar.make(
-                activity!!.findViewById(android.R.id.content), getString(R.string.note_deleted), Snackbar.LENGTH_LONG)
+                activity!!.findViewById(android.R.id.content),
+                getString(R.string.note_deleted),
+                Snackbar.LENGTH_LONG
+            )
                 .setAction(getString(R.string.note_restore)) {
                     noteViewModel.insert(note)
-                    val success = Snackbar.make(activity!!.findViewById(android.R.id.content), getString(R.string.note_restored), Snackbar.LENGTH_SHORT)
+                    val success = Snackbar.make(
+                        activity!!.findViewById(android.R.id.content), getString(
+                            R.string.note_restored
+                        ), Snackbar.LENGTH_SHORT
+                    )
                     success.show()
                 }.show()
         }
@@ -183,11 +265,20 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
         val bundle = Bundle()
         bundle.putString("destination", "view")
         bundle.putInt("id", note!!.id!!)
-        (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true,"note",bundle)
+        (activity as NavigationHost).navigateToWithData(
+            NoteFragment(),
+            addToBackstack = true,
+            animate = true,
+            "note",
+            bundle
+        )
     }
 
     override fun onResume() {
         super.onResume()
         activity!!.invalidateOptionsMenu();
+        Toast.makeText(context, "resume", Toast.LENGTH_SHORT).show()
+        in_login.visibility = View.GONE
+
     }
 }

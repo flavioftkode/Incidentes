@@ -15,4 +15,5 @@ class Note(
     @ColumnInfo(name = "hour") val hour: String,
     @ColumnInfo(name = "color") val color: String = "#FFFFFF",
     @ColumnInfo(name = "colorId") val colorId: Int = 0,
+    @ColumnInfo(name = "notification") val notification: Boolean = false,
 )

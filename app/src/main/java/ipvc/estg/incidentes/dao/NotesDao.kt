@@ -29,4 +29,7 @@ interface NotesDao {
 
     @Query("UPDATE notes SET colorId = :colorId,color = :color,description=:description,title=:title WHERE id == :id")
     suspend fun updateNote(id: Int,title:String,description:String,color: String,colorId:Int)
+
+    @Query("UPDATE notes SET notification=:status WHERE id == :id")
+    suspend fun setNotification(id: Int,status:Boolean)
 }

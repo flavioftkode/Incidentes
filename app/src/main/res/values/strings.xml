@@ -7,7 +7,7 @@
 
     <!-- Notes Fragment -->
     <string name="notes">Notas</string>
-    <string name="delete_note">Remover nota</string>
+    <string name="delete_note">Remover</string>
     <string name="note_deleted">Nota apagada com sucesso</string>
     <string name="note_restore">Restaurar</string>
     <string name="note_restored">Nota restaurada com sucesso</string>
@@ -31,4 +31,20 @@
     <string name="note_view">Ver nota</string>
     <string name="note_edit">Editar nota</string>
     <string name="navigation_note_edit">Editar nota</string>
+    <string name="navigation_filter">Filtrar</string>
+    <string name="navigation_set_alarm">Adicionar alarme</string>
+    <string name="navigation_unset_alarm">Desativar alarme</string>
+    <string name="notification_open">Ver</string>
+    <string name="notification_close">Dispensar</string>
+    <string name="notification_open_close">Ver e dispensar</string>
+
+    <!--Login Fragment-->
+    <string name="invalid_username">Insira um username válido</string>
+    <string name="invalid_password">Insira uma password válida</string>
+    <string name="login_success">Bem vindo</string>
+    <string name="wrong_user_info">Utilizador ou password errada</string>
+    <string name="login_fail">Oops, parece que ocorreu um erro ao realizar o seu login, verifique a sua coneção á internet e tente novamente</string>
+
+    <!--URL's-->
+    <string translatable="false" name="base_url">http://localhost:8888/</string>
 </resources>

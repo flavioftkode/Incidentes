@@ -4,6 +4,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
@@ -47,7 +48,11 @@ class NavigationIconClickListener @JvmOverloads internal constructor(
 
         updateIcon(view)
 
-        val translateY = height - context.resources.getDimensionPixelSize(R.dimen.animation_height)
+        var translateY = height - context.resources.getDimensionPixelSize(R.dimen.animation_height)
+        if (context.resources!!.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            translateY = height - context.resources.getDimensionPixelSize(R.dimen.animation_height_landscape)
+        }
+
 
         val animator = ObjectAnimator.ofFloat(
             sheet,

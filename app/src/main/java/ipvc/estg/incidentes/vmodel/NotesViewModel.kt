@@ -45,4 +45,8 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     fun updateNote(id: Int,title:String,description:String,color: String,colorId:Int) = viewModelScope.launch(Dispatchers.IO) {
         repository.updateNote(id,title,description,color,colorId)
     }
+
+    fun setNotification(id: Int,status:Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        repository.setNotification(id,status)
+    }
 }

@@ -30,31 +30,7 @@ class NoteRepository(private val notesDao: NotesDao) {
         notesDao.updateNote(id,title,description,color,colorId)
     }
 
-   /* fun getCitiesByCountry(country: String): LiveData<List<Note>> {
-        return notesDao.getCitiesByCountry(country)
+    suspend fun setNotification(id: Int,status:Boolean) {
+        notesDao.setNotification(id,status)
     }
-
-    fun getCountryFromCity(city: String): LiveData<Note> {
-        return notesDao.getCountryFromCity(city)
-    }*/
-
-    /*suspend fun insert(city: Note) {
-        notesDao.insert(city)
-    }
-
-    suspend fun deleteAll(){
-        notesDao.deleteAll()
-    }*/
-
-   /* suspend fun deleteByCity(city: String){
-        notesDao.deleteByCity(city)
-    }*/
-
-   /* suspend fun updateCity(city: City) {
-        cityDao.updateCity(city)
-    }
-
-    suspend fun updateCountryFromCity(city: String, country: String){
-        cityDao.updateCountryFromCity(city, country)
-    }*/
 }

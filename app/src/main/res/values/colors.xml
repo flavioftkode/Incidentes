@@ -30,12 +30,15 @@
     <color name="cpb_pink">#E91E63</color>
 
     <array name="colors">
-        <item>#DFC5F3</item>
-        <item>#F1CCD9</item>
-        <item>#B2DDEC</item>
-        <item>#FFADAD</item>
-        <item>#E3F1B9</item>
-        <item>#EDC0B3</item>
-        <item>#EDDCA8</item>
+        <item>#b2edff</item>
+        <item>#d6ff99</item>
+        <item>#f2f2f2</item>
+        <item>#baff8a</item>
+        <item>#f6bbff</item>
+        <item>#f9648a</item>
+        <item>#f17957</item>
+        <item>#5e92e5</item>
+        <item>#fef399</item>
+        <item>#f3f765</item>
     </array>
 </resources>

@@ -61,6 +61,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var options: PolygonOptions? = null
     var dragLat = 0.0
     var dragLon = 0.0
+    private var logged: Boolean? = false
+
     private val delta = 0.1f
     private val points: List<LatLng> = Arrays.asList<LatLng>(
         LatLng(90.0, -180.0),
@@ -176,9 +178,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
+
+
         _token = authenticationToken
-        _userId = authenticationUserId
+        _userId = authenticationUserId?.toString()
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
+
+        logged = (activity as NavigationHost).getLoggedUser()
+
+        if(logged!!){
+            view.in_auth.text = getString(R.string.navigation_logout)
+        }else{
+            view.in_auth.text = getString(R.string.navigation_login)
+        }
+
 
         //url = "getString(R.string.main_url) + getString(R.string.url_geslixo_server_api) + getString(R.string.url_get_incidente)"
 
@@ -340,12 +353,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun setClickListeners(view: View?) {
         btnTrash!!.setOnClickListener(this)
-        view!!.in_login.setOnClickListener {
+       /* view!!.in_login.setOnClickListener {
             (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
         }
 
         view.in_logout.setOnClickListener {
             (activity as NavigationHost).logout()
+        }*/
+
+        view!!.in_auth.setOnClickListener {
+            if(logged!!){
+                (activity as NavigationHost).logout(HomeFragment())
+            }else{
+                (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+            }
         }
 
         view.in_notes.setOnClickListener {
@@ -404,14 +425,15 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val authenticationToken: String? get() {
             val sharedPref = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
-            return sharedPref.getString("token", null)
+            return sharedPref.getString("_token", null)
         }
-    private val authenticationUserId: String? get() {
+
+    private val authenticationUserId: Int? get() {
             val sharedPref = context!!.getSharedPreferences(
                 "AUTHENTICATION",
                 Context.MODE_PRIVATE
             )
-            return sharedPref.getString("user_id", null)
+            return sharedPref.getInt("iduser", 0)
         }
 
     private fun goToLogin() {

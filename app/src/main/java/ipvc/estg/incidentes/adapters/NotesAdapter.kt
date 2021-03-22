@@ -1,16 +1,21 @@
 package ipvc.estg.incidentes.adapters
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.Note
+import kotlinx.android.synthetic.main.in_note_fragment.*
+import kotlinx.android.synthetic.main.in_note_fragment.view.*
 import java.util.*
+
 
 class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener, context: Context) : RecyclerView.Adapter<NotesAdapter.MyViewHolder>(), Filterable {
     private var notesList: MutableList<Note>
@@ -23,12 +28,13 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
       /*  var content: TextView*/
         var viewBackground: RelativeLayout
         var viewForeground: RelativeLayout
-       /* var image: ImageView*/
+        var alarm: ImageView
         var color: View
         var date: TextView
         var time: TextView
 
         init {
+
             title = view.findViewById(R.id.title)
 
           /*  content = view.findViewById(R.id.content)*/
@@ -37,7 +43,7 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
             time = view.findViewById(R.id.time)
             viewBackground = view.findViewById(R.id.view_background)
             viewForeground = view.findViewById(R.id.view_foreground)
-           /* image = view.findViewById(R.id.image)*/
+            alarm = view.findViewById(R.id.note_alarm)
 
 
             view.setOnClickListener { // send selected contact in callback
@@ -53,38 +59,66 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
     }
 
     override fun onBindViewHolder(holder: NotesAdapter.MyViewHolder, position: Int) {
+
         val note = notesListFiltered[position]
         holder.title.text = note.title
         holder.date.text = note.date
         holder.time.text = note.hour
-        holder.viewForeground.setBackgroundColor(Color.parseColor(note.color))
-        when (note.color) {
-            "#DFC5F3" -> {
-                holder.color.setBackgroundResource(R.color.cpb_purple)
-            }
-            "#F1CCD9" -> {
-                holder.color.setBackgroundResource(R.color.cpb_pink)
-            }
-            "#B2DDEC" -> {
-                holder.color.setBackgroundResource(R.color.cpb_blue)
-            }
-            "#FFADAD" -> {
-                holder.color.setBackgroundResource(R.color.cpb_red)
-            }
-            "#E3F1B9" -> {
-                holder.color.setBackgroundResource(R.color.cpb_green)
-            }
-            "#EDC0B3" -> {
-                holder.color.setBackgroundResource(R.color.cpb_orange)
-            }
-            "#EDDCA8" -> {
-                holder.color.setBackgroundResource(R.color.cpb_yellow)
-            }
-            else -> {
-                holder.color.setBackgroundResource(R.color.cpb_grey)
-            }
+        holder.color.setBackgroundColor(Color.parseColor(note.color))
 
+        if(note.notification){
+            holder.alarm.visibility = View.VISIBLE
         }
+
+        when (note.color) {
+            "#B2EDFF" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_blue)
+            }
+            "#D6FF99" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_green)
+            }
+            "#F2F2F2" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_grey)
+            }
+            "#BAFF8A" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_lime)
+            }
+            "#F6BBFF" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_pink)
+            }
+            "#F9648A" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_purple)
+            }
+            "#F17957" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_red)
+            }
+            "#5E92E5" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_royal)
+            }
+            "#FEF399" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_yellow)
+            }
+            "#F3F765" ->{
+                holder.viewForeground.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_yellow_darker)
+            }
+        }
+
+        var height = Resources.getSystem().displayMetrics.heightPixels.toString()
+        var screen = convertPxToDp(context,(height.toFloat())) - 100
+        var recycler = ((position +1) * 80)
+
+        Log.e("screen", screen.toString())
+        Log.e("recycler", recycler.toString())
+
+        if(recycler > screen){
+            addLastChildMargin(holder, 200, notesListFiltered.size, position)
+        }
+
+
+    }
+
+    fun convertPxToDp(context: Context, px: Float): Float {
+        return px / context.resources.displayMetrics.density
     }
 
     override fun getItemCount(): Int {
@@ -101,8 +135,14 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
                     val filteredList: MutableList<Note> =
                         ArrayList()
                     for (row in notesList) {
-                        if (row.title.toLowerCase(Locale.ROOT).contains(charSequence)||row.description.toLowerCase(Locale.ROOT).contains(charSequence) || row.date.toLowerCase(Locale.ROOT).contains(charSequence)
-                            || row.date.toLowerCase(Locale.ROOT).contains(charSequence) || row.hour.toLowerCase(Locale.ROOT).contains(charSequence)) {
+                        if (row.title.toLowerCase(Locale.ROOT).contains(charSequence)||row.description.toLowerCase(
+                                Locale.ROOT
+                            ).contains(charSequence) || row.date.toLowerCase(Locale.ROOT).contains(
+                                charSequence
+                            )
+                            || row.date.toLowerCase(Locale.ROOT).contains(charSequence) || row.hour.toLowerCase(
+                                Locale.ROOT
+                            ).contains(charSequence)) {
                             filteredList.add(row)
                         }
                     }
@@ -131,9 +171,32 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
         return notesListFiltered[position]
     }
 
+    fun getItemById(id: Int): Note {
+        for (i in 0 until notesListFiltered.size) {
+            if(notesListFiltered[i].id == id){
+                return notesListFiltered[i];
+            }
+        }
+        return notesListFiltered[0]
+    }
+
     fun removeItem(position: Int) {
         notesListFiltered.removeAt(position)
         notifyItemRemoved(position)
+    }
+
+    private fun addLastChildMargin(
+        holder: RecyclerView.ViewHolder,
+        margin: Int,
+        recyclerListSize: Int,
+        position: Int
+    ) {
+        if (recyclerListSize - 1 == position) {
+            //holder.itemView.setPadding(0, 0, 0, padding)
+            val params = holder.itemView.layoutParams as RecyclerView.LayoutParams
+            params.bottomMargin = margin
+            holder.itemView.layoutParams = params
+        }
     }
 
     init {

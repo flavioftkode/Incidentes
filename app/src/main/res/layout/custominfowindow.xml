@@ -47,7 +47,7 @@
     </LinearLayout>
 
    <!-- <LinearLayout
-        android:id="@+id/teste"
+        android:id="@+id/in_filter_fragment"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -14,15 +14,18 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical"
+        app:elevation="100dp"
         android:padding="0dp"
         android:paddingTop="0dp">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="0dp">
+            app:elevation="100dp">
 
             <androidx.appcompat.widget.Toolbar
+                app:elevation="100dp"
                 android:id="@+id/close_note"
                 style="@style/Widget.Shrine.Toolbar"
                 android:layout_width="match_parent"
@@ -32,38 +35,59 @@
                 android:paddingLeft="12dp"
                 android:paddingEnd="12dp"
                 android:paddingRight="12dp"
-                app:contentInsetStart="0dp"
+                app:contentInsetStart="-10dp"
                 app:navigationIcon="@drawable/in_close" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
+        <androidx.core.widget.NestedScrollView
+            android:fillViewport="true"
+            android:layout_below="@+id/app_bar"
+            android:elevation="-10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <RelativeLayout
-           android:layout_marginTop="44dp"
-            android:padding="25dp"
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
+            android:paddingBottom="25dp"
+            android:paddingTop="0dp"
+            android:layout_marginTop="0dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/note_title_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
+
                 android:hint="@string/note_title"
                 android:textColorHint="@color/cpb_black"
+                android:paddingStart="90dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="5dp"
+                android:ellipsize="end"
                 app:errorEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/note_title"
+                    android:layout_marginBottom="0dp"
+                    android:paddingBottom="0dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/transparent"
                     android:textColorHint="@color/cpb_black"
-                    android:inputType="text" />
+                    android:fontFamily="@font/handwritten"
+                    android:textSize="17sp"
+                    android:ellipsize="end"
+                    android:textStyle="bold"
+                    android:maxLines="4"
+                    android:maxLength="150"
+                    android:inputType="textMultiLine" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginBottom="15dp"
                 android:id="@+id/note_body_layout"
                 android:layout_below="@+id/note_title_layout"
                 android:layout_alignParentBottom="true"
@@ -80,6 +104,9 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <EditText
+                    android:justificationMode="inter_word"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/handwritten"
                     android:id="@+id/note_body"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -94,7 +121,7 @@
 
 
         </RelativeLayout>
-
+        </androidx.core.widget.NestedScrollView>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_note"
             style="@style/ButtonCornerLeftTop"
@@ -115,4 +142,4 @@
             app:strokeColor="@color/colorPrimary" />
 
     </RelativeLayout>
-</ScrollView>
+</FrameLayout>

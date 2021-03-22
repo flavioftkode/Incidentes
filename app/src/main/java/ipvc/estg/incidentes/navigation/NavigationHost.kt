@@ -1,9 +1,11 @@
 package ipvc.estg.incidentes.navigation
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebStorage
 import androidx.fragment.app.Fragment
+import java.time.Duration
 
 
 /**
@@ -21,9 +23,19 @@ interface NavigationHost {
 
     fun navigateToShared(fragment: Fragment, addToBackstack: Boolean, animate: Boolean, view: View?)
 
-    fun logout()
+    fun logout(fragment: Fragment)
 
     fun getRememberMe(): String?
 
     fun showColors(selectedColor:Int?)
+
+    fun showFilters()
+
+    fun timePickers(id:Int,title:String,body:String)
+
+    fun cancelNotification(id:Int)
+
+    fun customToaster(message:String,drawable: String,duration: Int)
+
+    fun getLoggedUser(): Boolean?
 }

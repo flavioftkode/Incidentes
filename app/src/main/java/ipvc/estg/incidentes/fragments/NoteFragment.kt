@@ -6,9 +6,12 @@ import android.util.Log
 import android.view.*
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.Note
 import ipvc.estg.incidentes.navigation.NavigationHost
@@ -18,6 +21,7 @@ import kotlinx.android.synthetic.main.in_note_fragment.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class NoteFragment : Fragment() {
 
@@ -29,6 +33,9 @@ class NoteFragment : Fragment() {
     var id:Int? = null
     var note_title:EditText? = null
     var note_body:EditText? = null
+    var alarm: Boolean = false
+    var myView : View? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +47,9 @@ class NoteFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.in_note_fragment, container, false)
+        myView = view
         note = view.findViewById(R.id.note_body)
+        note!!.setBackgroundColor(Color.parseColor("#F2F2F2"))
         (activity as AppCompatActivity).setSupportActionBar(view!!.close_note)
         noteViewModel = ViewModelProvider(this).get(NotesViewModel::class.java)
 
@@ -70,6 +79,7 @@ class NoteFragment : Fragment() {
             else -> {
                 (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.note_create)
                 inputState(view, true);
+                view.note_title_layout.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_grey)
             }
         }
 
@@ -78,6 +88,7 @@ class NoteFragment : Fragment() {
         return view
 
     }
+
 
     private fun inputState(view: View?, state: Boolean){
 
@@ -96,11 +107,51 @@ class NoteFragment : Fragment() {
             view!!.note_title.setText(note.title)
             view!!.note_body.setText(note.description)
             view!!.note_body!!.setBackgroundColor(Color.parseColor(note.color))
+
             selectedColor = note.colorId
             colorHex = note.color
+            alarm = note.notification
+            activity!!.invalidateOptionsMenu();
+
+            changeBackground(colorHex)
         })
 
 
+    }
+
+    fun changeBackground(colorHex: String){
+        when (colorHex) {
+            "#B2EDFF" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_blue)
+            }
+            "#D6FF99" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_green)
+            }
+            "#F2F2F2" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_grey)
+            }
+            "#BAFF8A" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_lime)
+            }
+            "#F6BBFF" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_pink)
+            }
+            "#F9648A" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_purple)
+            }
+            "#F17957" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_red)
+            }
+            "#5E92E5" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_royal)
+            }
+            "#FEF399" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_yellow)
+            }
+            "#F3F765" ->{
+                note_title_layout!!.background = ContextCompat.getDrawable(context!!, R.drawable.sticky_yellow_darker)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -111,10 +162,22 @@ class NoteFragment : Fragment() {
         menu.findItem(R.id.note_color).isVisible = destination != "view"
         menu.findItem(R.id.note_edit_cancel).isVisible = destination == "update"
 
+        if(destination == "view"){
+            menu.findItem(R.id.note_notification_set).isVisible = !alarm
+            menu.findItem(R.id.note_notification_unset).isVisible = alarm
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.note_notification_set -> {
+                (activity as NavigationHost).timePickers(id!!,(note_title!!.text.toString()),(note_body!!.text.toString()));
+                true
+            }
+            R.id.note_notification_unset -> {
+                (activity as NavigationHost).cancelNotification(id!!);
+                true
+            }
             R.id.note_color -> {
                 (activity as NavigationHost).showColors(selectedColor);
                 true
@@ -195,9 +258,20 @@ class NoteFragment : Fragment() {
         selectedColor = color
         colorHex = colorFormat
 
-        if(colorHex == "#FFFFFF"){
-            colorHex = "#e8e8e8"
+        if(colorHex == "#FFFFFF" || colorHex == ""){
+            colorHex = "#F2F2F2"
         }
         note!!.setBackgroundColor(Color.parseColor(colorHex))
+        Log.e("COLOR",colorHex)
+        changeBackground(colorHex)
     }
+
+    fun setNotification(){
+        noteViewModel.setNotification(id!!,true)
+    }
+
+    fun unsetNotification(){
+        noteViewModel.setNotification(id!!,false)
+    }
+
 }
