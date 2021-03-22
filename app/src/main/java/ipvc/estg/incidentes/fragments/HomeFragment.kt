@@ -64,7 +64,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private var logged: Boolean? = false
 
     private val delta = 0.1f
-    private val points: List<LatLng> = Arrays.asList<LatLng>(
+    private val points: List<LatLng> = listOf<LatLng>(
         LatLng(90.0, -180.0),
         LatLng(-90.0 + delta, -180.0 + delta),
         LatLng(-90.0 + delta, 0.0),
@@ -75,7 +75,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         LatLng(90.0 - delta, -180.0 + delta),
         LatLng(0.0, -180.0 + delta)
     )
-    private val hole: List<LatLng> = Arrays.asList<LatLng>(
+    private val hole: List<LatLng> = listOf<LatLng>(
         LatLng(38.6987916, -9.1759297),
         LatLng(38.698702, -9.1759008),
         LatLng(38.6986523, -9.1759037),
@@ -353,14 +353,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun setClickListeners(view: View?) {
         btnTrash!!.setOnClickListener(this)
-       /* view!!.in_login.setOnClickListener {
-            (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
-        }
-
-        view.in_logout.setOnClickListener {
-            (activity as NavigationHost).logout()
-        }*/
-
         view!!.in_auth.setOnClickListener {
             if(logged!!){
                 (activity as NavigationHost).logout(HomeFragment())
