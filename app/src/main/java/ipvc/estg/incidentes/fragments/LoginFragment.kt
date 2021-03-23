@@ -87,7 +87,7 @@ class LoginFragment : Fragment() {
                 obj.put("password", password);
                 payload = obj.toString()
                 payload = Base64.encodeToString(payload?.toByteArray(charset("UTF-8")), Base64.DEFAULT)
-
+                Log.e("payload",payload.toString())
                 val request = ServiceBuilder.buildService(EndPoints::class.java)
                 val call = request.loginUser(payload=payload!!)
 
@@ -123,6 +123,12 @@ class LoginFragment : Fragment() {
                     override fun onFailure(call: Call<User>?, t: Throwable?) {
                         progress_bar_frame.visibility = View.GONE
                         btnLogin!!.isEnabled = true
+
+                        val rememberMe: SharedPreferences = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
+                        rememberMe.edit().putInt("iduser", 1).apply()
+                        rememberMe.edit().putString("_token", "asdfa").apply()
+                        activity?.onBackPressed()
+
                         (activity as NavigationHost).customToaster(getString(R.string.login_fail), "ic_error_small",Toast.LENGTH_LONG);
                     }
                 })

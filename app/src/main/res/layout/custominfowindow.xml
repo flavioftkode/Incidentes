@@ -14,6 +14,9 @@
         android:gravity="center">
 
         <TextView
+            android:justificationMode="inter_word"
+            android:maxWidth="300dp"
+            android:ellipsize="end"
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,12 +37,14 @@
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Estado:"
-            android:paddingRight="2dp"
+            android:text="@string/info_window_status"
+            android:paddingEnd="2dp"
+            android:paddingStart="2dp"
             android:textStyle="bold"
             android:textColor="@color/Black" />
 
         <TextView
+            android:textStyle="bold"
             android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,10 +70,10 @@
 
 
     <LinearLayout
-        android:id="@+id/teste2"
+        android:gravity="center"
+        android:id="@+id/date_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:gravity="start"
         android:orientation="horizontal"
         android:padding="10dp">
 
@@ -76,19 +81,21 @@
             android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Data/hora:"
+            android:text="@string/info_window_date"
             android:paddingEnd="2dp"
+            android:paddingStart="2dp"
             android:textStyle="bold"
             android:textColor="@color/Black" />
 
         <TextView
+            android:textStyle="bold"
             android:id="@+id/date"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Completo"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/teste3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -106,6 +113,8 @@
             android:textColor="@color/Black" />
 
         <TextView
+            android:maxHeight="20dp"
+            android:maxWidth="20dp"
             android:id="@+id/location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -47,4 +47,14 @@
 
     <!--URL's-->
     <string translatable="false" name="base_url">http://localhost:8888/</string>
+
+    <!--Markers status-->
+    <string name="status_completed">Completo</string>
+    <string name="status_in_progress">Em execução</string>
+    <string name="status_received">Recebido</string>
+    <string name="status_error">Erro</string>
+
+    <string name="date">%s %s ás %s</string>
+    <string name="info_window_status">Estado:</string>
+    <string name="info_window_date">Data/hora:</string>
 </resources>

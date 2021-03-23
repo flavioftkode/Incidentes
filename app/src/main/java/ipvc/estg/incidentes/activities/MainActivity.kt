@@ -156,8 +156,11 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
         return sharedPref.getString("username", null)
     }
 
-    override fun getLoggedUser(): Boolean? {
-        val sharedPref: SharedPreferences = this.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
+    override fun isUserLogged(): Boolean? {
+        val sharedPref: SharedPreferences = this.getSharedPreferences(
+            "AUTHENTICATION",
+            Context.MODE_PRIVATE
+        )
 
         if(sharedPref.getInt("iduser", 0) != 0){
             return true
@@ -273,17 +276,34 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
          fragment.unsetNotification();
     }
 
-    override fun customToaster(message: String, drawable: String,duration: Int){
+    override fun customToaster(message: String, drawable: String, duration: Int){
         val inflater = layoutInflater
-        val layout: View = inflater.inflate(R.layout.custom_toast, findViewById<LinearLayout>(R.id.custom_toast_container))
+        val layout: View = inflater.inflate(
+            R.layout.custom_toast,
+            findViewById<LinearLayout>(R.id.custom_toast_container)
+        )
         val text = layout.findViewById<View>(R.id.text) as TextView
         text.text = message
         val resources: Resources = applicationContext.resources
-        val resourceId: Int = resources.getIdentifier(drawable, "drawable", applicationContext.packageName)
+        val resourceId: Int = resources.getIdentifier(
+            drawable,
+            "drawable",
+            applicationContext.packageName
+        )
         text.setCompoundDrawablesWithIntrinsicBounds(resourceId, 0, 0, 0);
         val toast = Toast(applicationContext)
         toast.duration = duration
         toast.view = layout
         toast.show()
+    }
+
+    override fun getAuthenticationToken(): String? {
+        val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
+        return sharedPref.getString("token", null)
+    }
+
+    override fun getAuthenticationUserId(): Int? {
+        val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
+        return sharedPref.getInt("iduser", 0)
     }
 }

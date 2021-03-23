@@ -2,6 +2,7 @@ package ipvc.estg.incidentes.services
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,11 +16,16 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.ui.IconGenerator
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.MyMarker
+import ipvc.estg.incidentes.fragments.NotesFragment
+import ipvc.estg.incidentes.navigation.NavigationHost
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -28,22 +34,22 @@ import java.text.SimpleDateFormat
 class MarkerClusterRenderer(
     private val mycontext: Context,
     map: GoogleMap,
-    clusterManager: ClusterManager<MyMarker>
+    clusterManager: ClusterManager<MyMarker?>
 ) :
     DefaultClusterRenderer<MyMarker>(mycontext, map, clusterManager), OnInfoWindowClickListener {
     private val googleMap: GoogleMap
     private val layoutInflater: LayoutInflater
-    private val iconGenerator: IconGenerator = IconGenerator(mycontext)
-    private val markerImageView: ImageView = ImageView(mycontext)
+    private val iconGenerator: IconGenerator
+    private val markerImageView: ImageView
     override fun onBeforeClusterItemRendered(item: MyMarker, markerOptions: MarkerOptions) {
-        if (item.status == 1) {
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background))
-        } else if (item.status == 2 || item.status == 3) {
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background))
-        } else if (item.status == 0) {
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background))
+        if (item.status.id == 1) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green_pin))
+        } else if (item.status.id == 2 || item.status.id == 3) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_yellow_pin))
+        } else if (item.status.id == 4) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_red_pin))
         } else {
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background))
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green_pin))
         }
     }
 
@@ -51,9 +57,25 @@ class MarkerClusterRenderer(
         marker.tag = clusterItem
     }
 
+
     override fun onInfoWindowClick(marker: Marker) {
         val myMarker = marker.tag as MyMarker?
-        /* Intent intent = new Intent(mycontext, SingleActivity.class);
+        val bundle = Bundle()
+        bundle.putString("destination", "view")
+        bundle.putInt("id", myMarker!!.id)
+        bundle.putCharSequence("position", myMarker.position.toString())
+        bundle.putDouble("latitude", myMarker.position.latitude)
+        bundle.putDouble("longitude", myMarker.position.longitude)
+        bundle.putString("date", myMarker.date)
+        bundle.putString("time", myMarker.time)
+        bundle.putInt("status", myMarker.status.id)
+        bundle.putString("description", myMarker.description)
+        bundle.putString("number", myMarker.number)
+        bundle.putString("photo", myMarker.photo)
+        bundle.putString("photo_finish", myMarker.photo_finish)
+        (mycontext as NavigationHost).navigateToWithData(NotesFragment(), addToBackstack = true, animate = true, data=bundle)
+        /* MyMarker myMarker = (MyMarker) marker.getTag();
+        Intent intent = new Intent(mycontext, SingleActivity.class);
         intent.putExtra("position",myMarker.getPosition());
         intent.putExtra("latitude",myMarker.getPosition().latitude);
         intent.putExtra("longitude",myMarker.getPosition().longitude);
@@ -70,31 +92,37 @@ class MarkerClusterRenderer(
         mycontext.startActivity(intent);*/
     }
 
+    override fun shouldRenderAsCluster(cluster: Cluster<MyMarker>?): Boolean {
+
+        return cluster!!.size > 1
+    }
+
+
     private inner class MyCustomClusterItemInfoView internal constructor() : InfoWindowAdapter {
         private val clusterItemView: View
+
         override fun getInfoWindow(marker: Marker): View {
             val myMarker = marker.tag as MyMarker? ?: return clusterItemView
             val status = clusterItemView.findViewById<TextView>(R.id.status)
-            Log.d("STATUS", myMarker.status.toString())
-            if (myMarker.status == 1) {
+            if (myMarker.status.id == 1) {
                 clusterItemView.findViewById<View>(R.id.number_color)
-                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.cpb_green))
-                status.text = "completo"
-                status.setTextColor(ContextCompat.getColor(mycontext, R.color.cpb_blue))
-            } else if (myMarker.status == 2 || myMarker.status == 3) {
+                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.success))
+                status.setText(R.string.status_completed)
+                status.setTextColor(ContextCompat.getColor(mycontext, R.color.success))
+            } else if (myMarker.status.id == 2 || myMarker.status.id == 3) {
                 clusterItemView.findViewById<View>(R.id.number_color)
-                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.cpb_red))
-                status.text = "progress"
-                status.setTextColor(ContextCompat.getColor(mycontext, R.color.cpb_red))
-            } else if (myMarker.status == 0) {
+                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.warning))
+                status.setText(R.string.status_in_progress)
+                status.setTextColor(ContextCompat.getColor(mycontext, R.color.warning))
+            } else if (myMarker.status.id == 0) {
                 clusterItemView.findViewById<View>(R.id.number_color)
-                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.cpb_green_dark))
-                status.text = "recived"
-                status.setTextColor(ContextCompat.getColor(mycontext, R.color.cpb_red_dark))
+                    .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.danger))
+                status.setText(R.string.status_received)
+                status.setTextColor(ContextCompat.getColor(mycontext, R.color.danger))
             } else {
                 clusterItemView.findViewById<View>(R.id.number_color)
                     .setBackgroundColor(ContextCompat.getColor(mycontext, R.color.cpb_grey))
-                status.text = "error"
+                status.setText(R.string.status_error)
                 status.setTextColor(ContextCompat.getColor(mycontext, R.color.cpb_grey))
             }
             val name = clusterItemView.findViewById<TextView>(R.id.name)
@@ -104,21 +132,25 @@ class MarkerClusterRenderer(
                 myMarker.number
             location.text = myMarker.location
             /*    description.setText(myMarker.getDescription());*/try {
-                val date_time = SimpleDateFormat("dd/MM/yyyy").parse(myMarker.date)
-                val formattedDate = SimpleDateFormat("dd MMMM yyyy").format(date_time)
-                date.text = formattedDate + " " + myMarker.time
+                val creationDate = SimpleDateFormat("dd/MM/yyyy").parse(myMarker.date)
+                val day = SimpleDateFormat("dd MMMM").format(creationDate)
+                val year = SimpleDateFormat("yyyy").format(creationDate)
+
+
+                date.text = mycontext.resources.getString(R.string.date, day,year,myMarker.time)
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
             return clusterItemView
         }
 
-        override fun getInfoContents(marker: Marker?): View? {
+        override fun getInfoContents(marker: Marker): View? {
             return null
         }
 
         init {
             clusterItemView = layoutInflater.inflate(R.layout.custominfowindow, null)
+            clusterItemView
         }
     }
 
@@ -127,6 +159,8 @@ class MarkerClusterRenderer(
     }
 
     init {
+        iconGenerator = IconGenerator(mycontext)
+        markerImageView = ImageView(mycontext)
         markerImageView.layoutParams = ViewGroup.LayoutParams(MARKER_DIMENSION, MARKER_DIMENSION)
         iconGenerator.setContentView(markerImageView)
         googleMap = map

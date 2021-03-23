@@ -194,7 +194,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
             )
         )
 
-        logged = (activity as NavigationHost).getLoggedUser()
+        logged = (activity as NavigationHost).isUserLogged()
 
         if(logged!!){
             view.in_auth.text = getString(R.string.navigation_logout)

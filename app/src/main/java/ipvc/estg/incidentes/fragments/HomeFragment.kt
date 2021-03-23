@@ -3,9 +3,11 @@ package ipvc.estg.incidentes.fragments
 import android.Manifest
 import android.R.attr.*
 import android.app.AlertDialog
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
@@ -31,6 +33,9 @@ import com.google.android.gms.maps.model.*
 import com.google.android.material.button.MaterialButton
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
+import com.google.maps.android.clustering.algo.Algorithm
+import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm
+import com.google.maps.android.clustering.algo.PreCachingAlgorithmDecorator
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.MyMarker
 import ipvc.estg.incidentes.listeners.NavigationIconClickListener
@@ -40,6 +45,7 @@ import ipvc.estg.incidentes.retrofit.ServiceBuilder
 import ipvc.estg.incidentes.services.GPSTracker
 import ipvc.estg.incidentes.services.MarkerClusterRenderer
 import kotlinx.android.synthetic.main.in_backdrop.view.*
+import kotlinx.android.synthetic.main.in_home_fragment.*
 import kotlinx.android.synthetic.main.in_home_fragment.view.*
 import kotlinx.android.synthetic.main.in_login_fragment.*
 import kotlinx.android.synthetic.main.in_main_activity.view.*
@@ -55,7 +61,7 @@ import kotlin.system.exitProcess
  *
  */
 class HomeFragment : Fragment(), View.OnClickListener {
-    var clusterManager: ClusterManager<MyMarker>? = null
+    var clusterManager: ClusterManager<MyMarker?>? = null
     var gps: GPSTracker? = null
     private var _token: String? = null
     private var _userId: String? = null
@@ -68,6 +74,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var dragLat = 0.0
     var dragLon = 0.0
     private var logged: Boolean? = false
+    private var clusterManagerAlgorithm: Algorithm<MyMarker>? = null
 
     private val delta = 0.1f
     private val points: List<LatLng> = listOf<LatLng>(
@@ -190,7 +197,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         _userId = authenticationUserId?.toString()
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
 
-        logged = (activity as NavigationHost).getLoggedUser()
+        logged = (activity as NavigationHost).isUserLogged()
 
         if(logged!!){
             view.in_auth.text = getString(R.string.navigation_logout)
@@ -381,8 +388,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun declareItems(root: View?) {
-        btnTrash = root!!.findViewById(R.id.call_trash)
+    private fun declareItems(view: View?) {
+        btnTrash = view!!.findViewById(R.id.call_trash)
+        context?.let { ContextCompat.getColor(it, R.color.cpb_blue_light) }?.let {
+            view!!.refresh_home!!.setColorSchemeColors(
+                it,
+                ContextCompat.getColor(context!!, R.color.cpb_orange_light),
+                ContextCompat.getColor(context!!, R.color.cpb_red_light),
+                ContextCompat.getColor(context!!, R.color.cpb_green_light)
+            )
+        }
+        view!!.refresh_home.setOnRefreshListener {
+            getMarkers()
+
+        }
     }
 
     override fun onClick(v: View) {
@@ -399,7 +418,13 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                     bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
                     bundle.putBoolean("mMarker", true)
-                    (activity as NavigationHost).navigateToWithData(EventFragment(), addToBackstack = true, animate = true, "event", bundle)
+                    (activity as NavigationHost).navigateToWithData(
+                        EventFragment(),
+                        addToBackstack = true,
+                        animate = true,
+                        "event",
+                        bundle
+                    )
 
                    /* intent.putExtra("mMarker_lat", mMarker.getPosition().latitude)
                     intent.putExtra("mMarker_long", mMarker.getPosition().longitude)
@@ -409,14 +434,24 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     bundle.putBoolean("mMarker", false)
                     if (mMap != null && PolyUtil.containsLocation(myLocation, hole, true)) {
                         myLocation
-                        mMarker = mMap!!.addMarker(MarkerOptions().position(myLocation).draggable(true).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker)))
+                        mMarker = mMap!!.addMarker(
+                            MarkerOptions().position(myLocation).draggable(
+                                true
+                            ).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
+                        )
                         Toast.makeText(context, "placed"/*getString("placed")*/, Toast.LENGTH_LONG)
                             .show()
                     } else if (mMarker != null) {
                         bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                         bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
                         bundle.putBoolean("mMarker", true)
-                        (activity as NavigationHost).navigateToWithData(EventFragment(), addToBackstack = true, animate = true, "event", bundle)
+                        (activity as NavigationHost).navigateToWithData(
+                            EventFragment(),
+                            addToBackstack = true,
+                            animate = true,
+                            "event",
+                            bundle
+                        )
                     } else {
                         Toast.makeText(
                             context,
@@ -464,6 +499,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
                     val portugal = LatLng(38.7071159, -9.1639664)
                     clusterManager = ClusterManager(context, googleMap) // 3
+                    clusterManagerAlgorithm = NonHierarchicalDistanceBasedAlgorithm<MyMarker>()
+
+                    // Set this local algorithm in clusterManager
+
+                    // Set this local algorithm in clusterManager
+                    clusterManager!!.algorithm = clusterManagerAlgorithm as Algorithm<MyMarker?>
                     clusterManager!!.clearItems()
                     options = PolygonOptions()
                     options!!.addAll(points).fillColor(Color.argb(100, 60, 63, 65))
@@ -564,96 +605,60 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun setUpClusterManager() {
         if (_token != null && _userId != null && myMarkers.isEmpty()) {
-            val request = ServiceBuilder.buildService(EndPoints::class.java)
-            val call = request.getCluster()
-
-            call.enqueue(object : Callback<List<MyMarker>> {
-                override fun onResponse(
-                    call: Call<List<MyMarker>>?,
-                    response: Response<List<MyMarker>>?
-                ) {
-
-                    if (response!!.isSuccessful) {
-
-                        /*response.body().forEach {
-                            *//*Log.e("response",it.photo.toString())*//*
-                            //val decodedString: String = Base64.decode(it.photo?.toByteArray(charset("UTF-8")), Base64.DEFAULT).toString()
-
-                            *//*val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)*//*
-
-                            val myMarker = MyMarker(
-                                id = it.id,
-                                latitude = it.latitude,
-                                longitude = it.longitude,
-                                latLng = LatLng(it.latitude,it.longitude),
-                                status = 1,
-                                location = it.location,
-                                number = it.location,
-                                date = it.location,
-                                time = it.location,
-                                description = it.description,
-                                photo = decodedString,
-                                photo_finish = decodedString
-                            )
-
-                            //myMarkers.add(myMarker)
-                        }*/
-
-                        myMarkers = response.body() as MutableList<MyMarker>
-                        /*val myMarker = MyMarker(
-                            id= response.body().id,
-                            latLng = LatLng(2.2, 2.2),
-                            status = 1,
-                            location = response.body().location,
-                            number = response.body().location,
-                            date = response.body().location,
-                            time = response.body().location,
-                            description = response.body().description,
-                            photo = response.body().photo,
-                            photo_finish = response.body().photo
-                        )*/
-
-                        //myMarkers = response.body() as MutableList<MyMarker>
-
-                        clusterManager!!.renderer = MarkerClusterRenderer(
-                            context!!,
-                            mMap!!,
-                            clusterManager!!
-                        )
-                        mMap!!.setOnCameraIdleListener(clusterManager)
-                        clusterManager!!.clearItems()
-                        clusterManager!!.addItems(myMarkers) // 4
-                        clusterManager!!.cluster()
-                        (activity as NavigationHost).customToaster(
-                            response.toString(),
-                            "ic_error_small",
-                            Toast.LENGTH_LONG
-                        );
-                    } else {
-                        if (response.code() == 403 && response.message() == "login_fail") {
-                            username_text_input.error = getString(R.string.wrong_user_info)
-                            password_text_input.error = getString(R.string.wrong_user_info)
-                        } else {
-                            (activity as NavigationHost).customToaster(
-                                "fail resp",
-                                "ic_error_small",
-                                Toast.LENGTH_LONG
-                            );
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                    (activity as NavigationHost).customToaster(
-                        t!!.message.toString(),
-                        "ic_error_small",
-                        Toast.LENGTH_LONG
-                    );
-                    Log.e("responseerr", t!!.message.toString())
-                }
-
-            })
+            refresh_home!!.isRefreshing = true
+            getMarkers()
         }
+    }
+
+    fun getMarkers(){
+        val request = ServiceBuilder.buildService(EndPoints::class.java)
+        val call = request.getCluster()
+
+        call.enqueue(object : Callback<List<MyMarker>> {
+            override fun onResponse(
+                call: Call<List<MyMarker>>?,
+                response: Response<List<MyMarker>>?
+            ) {
+
+                if (response!!.isSuccessful) {
+                    myMarkers.clear()
+                    response.body().forEach {
+                        //val decodedString: String = Base64.decode(it.photo?.toByteArray(charset("UTF-8")),Base64.DEFAULT).toString()
+
+                        val myMarker = MyMarker(
+                            id = it.id,
+                            latitude = it.latitude,
+                            longitude = it.longitude,
+                            latLng = LatLng(it.latitude, it.longitude),
+                            status = it.status,
+                            location = it.location,
+                            number = it.location,
+                            date = it.date,
+                            time = it.time,
+                            description = it.description,
+                            photo = it.photo,
+                            photo_finish = it.photo
+                        )
+
+                        myMarkers.add(myMarker)
+                    }
+
+                    clusterManager!!.renderer = MarkerClusterRenderer(context!!, mMap!!, clusterManager!!)
+                    mMap!!.setOnCameraIdleListener(clusterManager)
+                    clusterManager!!.clearItems()
+                    clusterManager!!.addItems(myMarkers as Collection<MyMarker?>?) // 4
+                    clusterManager!!.cluster()
+                }
+                refresh_home!!.isRefreshing = false
+            }
+
+            override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
+                (activity as NavigationHost).customToaster( t!!.message.toString(), "ic_error_small", Toast.LENGTH_LONG);
+                Log.e("responseerr", t!!.message.toString())
+                refresh_home!!.isRefreshing = false
+            }
+
+        })
     }
 
     private val myLocation: LatLng
