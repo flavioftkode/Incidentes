@@ -13,8 +13,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import com.alibaba.fastjson.JSON
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -208,20 +210,21 @@ class EventFragment : Fragment() {
 
             if (imageFilePath != null) {
                 obj.put("photo", getFileToByte(imageFilePath))
-
-
                 obj.put("image", System.currentTimeMillis().toString() + ".jpg")
             }
 
             var payload = Base64.encodeToString(obj.toString().toByteArray(charset("UTF-8")), Base64.DEFAULT)
-            Log.e("payload", payload)
 
-            val call = request.insertEvent(payload = payload)
+
+            val token = (activity as NavigationHost).getAuthenticationToken()
+
+            val call = request.insertEvent(payload = payload, token!!)
 
             call.enqueue(object : Callback<Event> {
                 override fun onResponse(call: Call<Event>?, response: Response<Event>?) {
+                    Log.e("response", response.toString())
                     if (response!!.isSuccessful) {
-
+                        (activity as NavigationHost).customToaster(getString(R.string.event_created), "ic_checked", Toast.LENGTH_LONG)
                         activity?.onBackPressed()
                     } else {
                         if (response.code() == 403 && response.message() == "login_fail") {
@@ -241,7 +244,7 @@ class EventFragment : Fragment() {
 
     }
 
-    fun getFileToByte(filePath: String?): String? {
+    private fun getFileToByte(filePath: String?): String? {
         var bmp: Bitmap? = null
         var bos: ByteArrayOutputStream? = null
         var bt: ByteArray? = null
@@ -255,7 +258,6 @@ class EventFragment : Fragment() {
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-        Log.d("IMG", encodeString!!)
         return encodeString
     }
 

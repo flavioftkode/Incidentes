@@ -299,7 +299,7 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
 
     override fun getAuthenticationToken(): String? {
         val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
-        return sharedPref.getString("token", null)
+        return "Bearer " +sharedPref.getString("_token", null)
     }
 
     override fun getAuthenticationUserId(): Int? {

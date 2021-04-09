@@ -54,7 +54,15 @@
     <string name="status_received">Recebido</string>
     <string name="status_error">Erro</string>
 
-    <string name="date">%s %s ás %s</string>
+    <string name="date">%s %s às %s</string>
     <string name="info_window_status">Estado:</string>
     <string name="info_window_date">Data/hora:</string>
+    <string name="event_created">Incidente reportado.</string>
+    <string name="user_report">Reportado por mim</string>
+    <string name="event_comment">Comentários ou informações extra</string>
+    <string name="event_location">Localização</string>
+    <string name="event_add_image">Adicionar imagem</string>
+    <string name="event_no_image">Sem imagem</string>
+    <string name="event_image">Imagem</string>
+    <string name="create_event">Registar incidente</string>
 </resources>

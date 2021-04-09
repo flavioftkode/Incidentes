@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
@@ -35,7 +36,6 @@ import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.algo.Algorithm
 import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm
-import com.google.maps.android.clustering.algo.PreCachingAlgorithmDecorator
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.MyMarker
 import ipvc.estg.incidentes.listeners.NavigationIconClickListener
@@ -189,7 +189,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var progress = false
     override fun onCreateView(
         inflater: LayoutInflater,
-        container: ViewGroup?, savedInstanceState: Bundle?
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
 
 
@@ -554,7 +555,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             dragLat = mMarker!!.position.latitude
                             dragLon = mMarker!!.position.longitude
                         } else {
-                            Toast.makeText(context, "invalid", Toast.LENGTH_SHORT).show()
+                            (activity as NavigationHost).customToaster(
+                               "Marcador fora da area permitida",
+                                "ic_error_small",
+                                Toast.LENGTH_LONG
+                            );
+                           /* Toast.makeText(context, "Marcador fora da area permitida", Toast.LENGTH_SHORT).show()*/
                         }
                     }
                     mMap!!.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
@@ -605,8 +611,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun setUpClusterManager() {
         if (_token != null && _userId != null && myMarkers.isEmpty()) {
-            refresh_home!!.isRefreshing = true
-            getMarkers()
+
+            if(!refresh_home!!.isRefreshing){
+                refresh_home!!.isRefreshing = true
+                getMarkers()
+            }
+
         }
     }
 
@@ -619,31 +629,41 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 call: Call<List<MyMarker>>?,
                 response: Response<List<MyMarker>>?
             ) {
-
+                myMarkers.clear()
+                Log.e("----", "----")
+                Log.e("response", response!!.body().toString())
                 if (response!!.isSuccessful) {
-                    myMarkers.clear()
                     response.body().forEach {
                         //val decodedString: String = Base64.decode(it.photo?.toByteArray(charset("UTF-8")),Base64.DEFAULT).toString()
-
-                        val myMarker = MyMarker(
-                            id = it.id,
-                            latitude = it.latitude,
-                            longitude = it.longitude,
-                            latLng = LatLng(it.latitude, it.longitude),
-                            status = it.status,
-                            location = it.location,
-                            number = it.location,
-                            date = it.date,
-                            time = it.time,
-                            description = it.description,
-                            photo = it.photo,
-                            photo_finish = it.photo
-                        )
-
-                        myMarkers.add(myMarker)
+                       /* Log.e("response string", it.photo.toString())
+                        Log.e("response it", decodedByte.toString())*/
+                        try {
+                            val myMarker = MyMarker(
+                                id = it.id,
+                                latitude = it.latitude,
+                                longitude = it.longitude,
+                                latLng = LatLng(it.latitude, it.longitude),
+                                status = it.status,
+                                location = it.location,
+                                number = it.location,
+                                date = it.date,
+                                time = it.time,
+                                description = it.description,
+                                photo = it.photo,
+                                photo_finish = it.photo,
+                                user_id = it.user_id
+                            )
+                            myMarkers.add(myMarker)
+                        } catch (e: Exception) {
+                            Log.e("catch", e.toString())
+                        }
                     }
 
-                    clusterManager!!.renderer = MarkerClusterRenderer(context!!, mMap!!, clusterManager!!)
+                    clusterManager!!.renderer = MarkerClusterRenderer(
+                        context!!,
+                        mMap!!,
+                        clusterManager!!
+                    )
                     mMap!!.setOnCameraIdleListener(clusterManager)
                     clusterManager!!.clearItems()
                     clusterManager!!.addItems(myMarkers as Collection<MyMarker?>?) // 4
@@ -653,8 +673,13 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                (activity as NavigationHost).customToaster( t!!.message.toString(), "ic_error_small", Toast.LENGTH_LONG);
-                Log.e("responseerr", t!!.message.toString())
+                (activity as NavigationHost).customToaster(
+                    t!!.message.toString(),
+                    "ic_error_small",
+                    Toast.LENGTH_LONG
+                );
+                Log.e("error", t.message.toString())
+                Log.e("responseerr", call.toString())
                 refresh_home!!.isRefreshing = false
             }
 
@@ -760,7 +785,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }*/
 
     companion object {
-        private var URL: String? = null
         var eventCounter = 0
         private fun isLocationEnabled(context: Context?): Boolean {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

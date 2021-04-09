@@ -18,5 +18,5 @@ interface EndPoints {
 
     @FormUrlEncoded
     @POST("/api/event/insert")
-    fun insertEvent(@Field("payload") payload: String): Call<Event>
+    fun insertEvent(@Field("payload") payload: String,@Header("Authorization") auth : String ): Call<Event>
 }
