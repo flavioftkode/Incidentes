@@ -81,7 +81,8 @@ class MarkerClusterRenderer(
         bundle.putString("number", myMarker.number)
         bundle.putString("photo", myMarker.photo)
         bundle.putString("photo_finish", myMarker.photo_finish)
-        (mycontext as NavigationHost).navigateToWithData(NotesFragment(), addToBackstack = true, animate = true, data = bundle)
+        //TODO FRAGMENT VIEW EVENT
+        /*(mycontext as NavigationHost).navigateToWithData(NotesFragment(), addToBackstack = true, animate = true, data = bundle)*/
     }
 
     override fun shouldRenderAsCluster(cluster: Cluster<MyMarker>?): Boolean {
