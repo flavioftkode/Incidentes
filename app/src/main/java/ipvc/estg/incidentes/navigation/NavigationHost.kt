@@ -37,5 +37,9 @@ interface NavigationHost {
 
     fun customToaster(message:String,drawable: String,duration: Int)
 
-    fun getLoggedUser(): Boolean?
+    fun isUserLogged(): Boolean?
+
+    fun getAuthenticationUserId(): Int?
+
+    fun getAuthenticationToken(): String?
 }

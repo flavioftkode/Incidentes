@@ -29,6 +29,11 @@
     <color name="cpb_purple">#673AB7</color>
     <color name="cpb_pink">#E91E63</color>
 
+    <color name="info">#c8448aff</color>
+    <color name="success">#ff6d9b00</color>
+    <color name="warning">#c8ffb133</color>
+    <color name="danger">#9B0000</color>
+
     <array name="colors">
         <item>#b2edff</item>
         <item>#d6ff99</item>

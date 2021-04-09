@@ -53,8 +53,7 @@ class NotesAdapter(notesList: MutableList<Note>, listener: NotesAdapterListener,
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotesAdapter.MyViewHolder {
-        val itemView: View = LayoutInflater.from(parent.context)
-            .inflate(R.layout.note_row, parent, false)
+        val itemView: View = LayoutInflater.from(parent.context).inflate(R.layout.note_row, parent, false)
         return MyViewHolder(itemView)
     }
 

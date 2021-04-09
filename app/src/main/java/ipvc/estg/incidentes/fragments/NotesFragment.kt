@@ -120,13 +120,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
                 val bundle = Bundle()
                 bundle.putString("destination", "view")
                 bundle.putInt("id", note.id!!)
-                (activity as NavigationHost).navigateToWithData(
-                    NoteFragment(),
-                    addToBackstack = true,
-                    animate = true,
-                    "note",
-                    bundle
-                )
+                (activity as NavigationHost).navigateToWithData(NoteFragment(), addToBackstack = true, animate = true, "note", bundle)
                 noteViewModel.setNotification(note.id, false)
                 notification = null
             }
@@ -194,7 +188,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
             )
         )
 
-        logged = (activity as NavigationHost).getLoggedUser()
+        logged = (activity as NavigationHost).isUserLogged()
 
         if(logged!!){
             view.in_auth.text = getString(R.string.navigation_logout)
