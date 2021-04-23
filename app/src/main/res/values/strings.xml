@@ -65,4 +65,10 @@
     <string name="event_no_image">Sem imagem</string>
     <string name="event_image">Imagem</string>
     <string name="create_event">Registar incidente</string>
+    <string name="no_login">É necessário login para realizar esta ação</string>
+    <string name="consent_title">Consentimento</string>
+    <string name="consent_body">Mensagem</string>
+    <string name="consent_checkbox_1">Concordo 1</string>
+    <string name="consent_checkbox_2">Concordo 2</string>
+    <string name="consent_needed">É necessario o seu consentimento para continuar</string>
 </resources>

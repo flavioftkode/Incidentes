@@ -64,7 +64,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var clusterManager: ClusterManager<MyMarker?>? = null
     var gps: GPSTracker? = null
     private var _token: String? = null
-    private var _userId: String? = null
+    private var _userId: Int? = null
     private var mMapView: MapView? = null
     private var mMap: GoogleMap? = null
     var btnTrash: MaterialButton? = null
@@ -195,7 +195,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
 
         _token = authenticationToken
-        _userId = authenticationUserId?.toString()
+        _userId = authenticationUserId
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
 
         logged = (activity as NavigationHost).isUserLogged()
@@ -206,13 +206,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
             view.in_auth.text = getString(R.string.navigation_login)
         }
 
-
-        //url = "getString(R.string.main_url) + getString(R.string.url_geslixo_server_api) + getString(R.string.url_get_incidente)"
-
         // Set up the tool bar
-        setToolbar(view);
-
-       /* map_loading?.visibility = View.GONE;*/
+        setToolbar(view)
         if (!isLocationEnabled(context)) {
             promptTurnGPS()
         }
@@ -225,18 +220,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         try {
             val zoomIn: View = mMapView!!.findViewWithTag("GoogleMapZoomInButton")
-
-            // we need the parent view of the zoomin/zoomout buttons - it didn't have a tag
-            // so we must get the parent reference of one of the zoom buttons
-
-            // we need the parent view of the zoomin/zoomout buttons - it didn't have a tag
-            // so we must get the parent reference of one of the zoom buttons
             val zoomInOut = zoomIn.parent as View
 
             if (zoomInOut != null) {
                 moveView(zoomInOut, left, top, right, bottom, false, false)
             }
-            /*   MapsInitializer.initialize(getActivity().getApplicationContext());*/
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -322,18 +310,21 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
+        if(!(activity as NavigationHost).getConsentStatus()!! && (_token != null && _token != "Bearer" && _userId != 0)){
+            (activity as NavigationHost).navigateTo(ConsentFragment(),addToBackstack = false,animate = true,tag="consent")
+        }
         /*map_loading.visibility = View.VISIBLE;*/
-        activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
+        //activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
         if (mMap != null) {
             mMap!!.clear()
             myMarkers.clear()
-            map
+            getMarkers()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        activity!!.unregisterReceiver(mNotificationReceiver)
+        //activity!!.unregisterReceiver(mNotificationReceiver)
     }
 
     private val mNotificationReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -392,16 +383,15 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private fun declareItems(view: View?) {
         btnTrash = view!!.findViewById(R.id.call_trash)
         context?.let { ContextCompat.getColor(it, R.color.cpb_blue_light) }?.let {
-            view!!.refresh_home!!.setColorSchemeColors(
+            view.refresh_home!!.setColorSchemeColors(
                 it,
                 ContextCompat.getColor(context!!, R.color.cpb_orange_light),
                 ContextCompat.getColor(context!!, R.color.cpb_red_light),
                 ContextCompat.getColor(context!!, R.color.cpb_green_light)
             )
         }
-        view!!.refresh_home.setOnRefreshListener {
+        view.refresh_home.setOnRefreshListener {
             getMarkers()
-
         }
     }
 
@@ -409,8 +399,14 @@ class HomeFragment : Fragment(), View.OnClickListener {
         if (v === btnTrash) {
             btnTrash!!.isEnabled = false
             //btnTrash!!.showLoading()
-            if (authenticationToken == null || authenticationToken!!.isEmpty()) {
-                Toast.makeText(context, "no login", Toast.LENGTH_SHORT).show()
+            Log.e("token", _token.toString())
+            Log.e("_userId", _userId.toString())
+            if (_token == null || _token == "Bearer" || _userId == 0) {
+                (activity as NavigationHost).customToaster(
+                    getString(R.string.no_login),
+                    "ic_error_small",
+                    Toast.LENGTH_LONG
+                );
                 goToLogin()
             } else {
                 val bundle = Bundle()
@@ -470,16 +466,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
     }
 
     private val authenticationToken: String? get() {
-            val sharedPref = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
-            return sharedPref.getString("_token", null)
-        }
+        return (activity as NavigationHost).getAuthenticationToken()
+    }
 
     private val authenticationUserId: Int? get() {
-            val sharedPref = context!!.getSharedPreferences(
-                "AUTHENTICATION",
-                Context.MODE_PRIVATE
-            )
-            return sharedPref.getInt("iduser", 0)
+        return (activity as NavigationHost).getAuthenticationUserId()
         }
 
     private fun goToLogin() {
@@ -501,8 +492,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     val portugal = LatLng(38.7071159, -9.1639664)
                     clusterManager = ClusterManager(context, googleMap) // 3
                     clusterManagerAlgorithm = NonHierarchicalDistanceBasedAlgorithm<MyMarker>()
-
-                    // Set this local algorithm in clusterManager
 
                     // Set this local algorithm in clusterManager
                     clusterManager!!.algorithm = clusterManagerAlgorithm as Algorithm<MyMarker?>
@@ -610,17 +599,17 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
 
     private fun setUpClusterManager() {
-        if (_token != null && _userId != null && myMarkers.isEmpty()) {
-
+        if (myMarkers.isEmpty()) {
             if(!refresh_home!!.isRefreshing){
                 refresh_home!!.isRefreshing = true
                 getMarkers()
             }
-
         }
     }
 
+    /*GET ALL MARKERS*/
     fun getMarkers(){
+        Log.e("markers","getmarkers")
         val request = ServiceBuilder.buildService(EndPoints::class.java)
         val call = request.getCluster()
 
@@ -633,30 +622,29 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 Log.e("----", "----")
                 Log.e("response", response!!.body().toString())
                 if (response!!.isSuccessful) {
-                    response.body().forEach {
-                        //val decodedString: String = Base64.decode(it.photo?.toByteArray(charset("UTF-8")),Base64.DEFAULT).toString()
-                       /* Log.e("response string", it.photo.toString())
-                        Log.e("response it", decodedByte.toString())*/
-                        try {
-                            val myMarker = MyMarker(
-                                id = it.id,
-                                latitude = it.latitude,
-                                longitude = it.longitude,
-                                latLng = LatLng(it.latitude, it.longitude),
-                                status = it.status,
-                                location = it.location,
-                                number = it.location,
-                                date = it.date,
-                                time = it.time,
-                                description = it.description,
-                                photo = it.photo,
-                                photo_finish = it.photo,
-                                user_id = it.user_id
-                            )
-                            myMarkers.add(myMarker)
-                        } catch (e: Exception) {
-                            Log.e("catch", e.toString())
+                    try {
+                        response.body().forEach {
+
+                                val myMarker = MyMarker(
+                                    id = it.id,
+                                    latitude = it.latitude,
+                                    longitude = it.longitude,
+                                    latLng = LatLng(it.latitude, it.longitude),
+                                    status = it.status,
+                                    location = it.location,
+                                    number = it.location,
+                                    date = it.date,
+                                    time = it.time,
+                                    description = it.description,
+                                    photo = it.photo,
+                                    photo_finish = it.photo,
+                                    user_id = it.user_id
+                                )
+                                myMarkers.add(myMarker)
+
                         }
+                    } catch (e: Exception) {
+                        Log.e("catch", e.toString())
                     }
 
                     clusterManager!!.renderer = MarkerClusterRenderer(
@@ -673,13 +661,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                (activity as NavigationHost).customToaster(
-                    t!!.message.toString(),
-                    "ic_error_small",
-                    Toast.LENGTH_LONG
-                );
-                Log.e("error", t.message.toString())
-                Log.e("responseerr", call.toString())
+                (activity as NavigationHost).customToaster(t!!.message.toString(), "ic_error_small", Toast.LENGTH_LONG);
                 refresh_home!!.isRefreshing = false
             }
 

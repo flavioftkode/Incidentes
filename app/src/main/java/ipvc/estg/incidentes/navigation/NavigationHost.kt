@@ -42,4 +42,8 @@ interface NavigationHost {
     fun getAuthenticationUserId(): Int?
 
     fun getAuthenticationToken(): String?
+
+    fun setConsent()
+
+    fun getConsentStatus(): Boolean?
 }

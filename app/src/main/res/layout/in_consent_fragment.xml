@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/cpb_white"
+    android:backgroundTint="@color/cpb_white"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="56dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp">
+
+      <!--  <ImageView
+            android:id="@+id/ic_login"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"/>-->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/consent_title"
+            android:gravity="center"
+            android:textSize="30sp"
+            android:layout_marginBottom="44dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:justificationMode="inter_word"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/consent_body"
+            android:layout_marginBottom="64dp"
+            android:layout_gravity="center_vertical|end"/>
+
+        <CheckBox android:id="@+id/checkbox_consent_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/consent_checkbox_1" />
+        <CheckBox android:id="@+id/checkbox_consent_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/consent_checkbox_2" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+
+                <com.github.florent37.shapeofview.shapes.CutCornerView
+                    android:enabled="false"
+                    android:clickable="false"
+                    android:focusable="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:elevation="3dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:textAlignment="center"
+                    app:shape_cutCorner_bottomLeftSize="12dp"
+                    app:shape_cutCorner_bottomRightSize="12dp"
+                    app:shape_cutCorner_topLeftSize="12dp"
+                    app:shape_cutCorner_topRightSize="12dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:visibility="visible"
+                        android:enabled="false"
+                        android:clickable="false"
+                        android:id="@+id/btn_consent"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:textAlignment="center"
+                        android:background="@color/colorPrimary"
+                        android:foreground="?attr/selectableItemBackground">
+
+                        <LinearLayout
+                            android:background="@color/transparent"
+                            android:backgroundTint="@color/transparent"
+                            android:gravity="center_horizontal"
+                            android:orientation="horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <!--<ImageView
+                                android:id="@+id/loginImage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:layout_marginRight="5dp"
+                                android:src="@drawable/ic_login" />-->
+
+                            <TextView
+                                app:layout_constraintStart_toEndOf="@+id/loginImage"
+                                android:id="@+id/loginText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="Continuar"
+                                android:textAlignment="center"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+
+                        </LinearLayout>
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <FrameLayout
+                        android:background="@color/colorPrimary"
+                        android:elevation="2dp"
+                        android:visibility="gone"
+                        android:id="@+id/progress_bar_frame"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
+
+                        <ProgressBar
+                            android:background="@color/transparent"
+                            android:backgroundTint="@color/transparent"
+                            android:id="@+id/progress_bar"
+                            style="@style/Base.Widget.AppCompat.ProgressBar"
+                            android:indeterminateTint="@android:color/white"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"/>
+
+                    </FrameLayout>
+                </com.github.florent37.shapeofview.shapes.CutCornerView>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+
+
+    </LinearLayout>
+</ScrollView>

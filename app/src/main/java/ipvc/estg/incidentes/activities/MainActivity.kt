@@ -306,4 +306,16 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
         val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
         return sharedPref.getInt("iduser", 0)
     }
+
+    override fun setConsent() {
+        val preferences: SharedPreferences = getSharedPreferences("CONSENT", Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putInt("isConsentCheck", 1)
+        editor.apply()
+    }
+
+    override fun getConsentStatus(): Boolean {
+        val sharedPref = getSharedPreferences("CONSENT", MODE_PRIVATE)
+        return sharedPref.getInt("isConsentCheck", 0) == 1
+    }
 }
