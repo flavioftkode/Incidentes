@@ -33,7 +33,7 @@
                 android:paddingRight="12dp"
                 app:contentInsetStart="0dp"
                 app:navigationIcon="@drawable/in_close"
-                app:title="Login" />
+                app:title="Login - Landscape" />
 
         </com.google.android.material.appbar.AppBarLayout>
 

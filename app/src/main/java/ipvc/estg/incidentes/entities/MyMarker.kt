@@ -18,7 +18,8 @@ class MyMarker(// 2
     val photo: String,
     val photo_finish: String,
     val status: Status,
-    val user_id: Int
+    val user_id: Int,
+    val type: Int,
 ) :
     ClusterItem {
 

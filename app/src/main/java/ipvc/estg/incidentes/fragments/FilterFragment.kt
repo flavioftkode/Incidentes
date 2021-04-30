@@ -1,5 +1,7 @@
 package ipvc.estg.incidentes.fragments
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +12,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ipvc.estg.incidentes.R
+import ipvc.estg.incidentes.navigation.NavigationHost
 import kotlinx.android.synthetic.main.in_filter_fragment.*
+import kotlinx.android.synthetic.main.in_filter_fragment.view.*
 
 
 class FilterFragment : BottomSheetDialogFragment() {
@@ -25,7 +29,72 @@ class FilterFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         if (savedInstanceState != null) dismiss()
-        return inflater.inflate(R.layout.in_filter_fragment, container, false)
+        val view = inflater.inflate(R.layout.in_filter_fragment, container, false)
+
+        val preferences: SharedPreferences = context!!.getSharedPreferences(
+            "FILTERMAP",
+            Context.MODE_PRIVATE
+        )
+        view.checkbox_1.isChecked = preferences.getBoolean("0", true)
+        view.checkbox_2.isChecked = preferences.getBoolean("1", true)
+        view.checkbox_3.isChecked = preferences.getBoolean("2", true)
+        view.checkbox_4.isChecked = preferences.getBoolean("3", true)
+        view.checkbox_5.isChecked = preferences.getBoolean("4", true)
+        view.radius.setText((preferences.getInt("radius", 0)).toString())
+
+        view.checkbox_1.setOnCheckedChangeListener { buttonView, isChecked ->
+            val preferences: SharedPreferences = context!!.getSharedPreferences(
+                "FILTERMAP",
+                Context.MODE_PRIVATE
+            )
+            val editor = preferences.edit()
+            editor.putBoolean("0", isChecked)
+            editor.apply()
+        }
+
+        view.checkbox_2.setOnCheckedChangeListener { buttonView, isChecked ->
+            val preferences: SharedPreferences = context!!.getSharedPreferences(
+                "FILTERMAP",
+                Context.MODE_PRIVATE
+            )
+            val editor = preferences.edit()
+            editor.putBoolean("1", isChecked)
+            editor.apply()
+        }
+
+        view.checkbox_3.setOnCheckedChangeListener { buttonView, isChecked ->
+            val preferences: SharedPreferences = context!!.getSharedPreferences(
+                "FILTERMAP",
+                Context.MODE_PRIVATE
+            )
+            val editor = preferences.edit()
+            editor.putBoolean("2", isChecked)
+            editor.apply()
+        }
+
+        view.checkbox_4.setOnCheckedChangeListener { buttonView, isChecked ->
+            val preferences: SharedPreferences = context!!.getSharedPreferences(
+                "FILTERMAP",
+                Context.MODE_PRIVATE
+            )
+            val editor = preferences.edit()
+            editor.putBoolean("3", isChecked)
+            editor.apply()
+        }
+
+        view.checkbox_5.setOnCheckedChangeListener { buttonView, isChecked ->
+            val preferences: SharedPreferences = context!!.getSharedPreferences(
+                "FILTERMAP",
+                Context.MODE_PRIVATE
+            )
+            val editor = preferences.edit()
+            editor.putBoolean("4", isChecked)
+            editor.apply()
+        }
+
+
+        return view
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,6 +121,14 @@ class FilterFragment : BottomSheetDialogFragment() {
         })
 
         filterClose.setOnClickListener {
+
+            val preferences: SharedPreferences = context!!.getSharedPreferences("FILTERMAP", Context.MODE_PRIVATE)
+            val editor = preferences.edit()
+            editor.putInt("radius", (view.radius).text.toString().toInt())
+            editor.apply()
+
+            val fragment: HomeFragment = activity!!.supportFragmentManager.findFragmentByTag("home") as HomeFragment
+            fragment.getMarkers()
             dismiss()
         }
     }

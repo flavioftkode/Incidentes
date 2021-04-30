@@ -13,10 +13,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
-import com.alibaba.fastjson.JSON
 import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -27,7 +28,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import ipvc.estg.incidentes.BuildConfig
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.Event
-import ipvc.estg.incidentes.entities.User
 import ipvc.estg.incidentes.navigation.NavigationHost
 import ipvc.estg.incidentes.retrofit.EndPoints
 import ipvc.estg.incidentes.retrofit.ServiceBuilder
@@ -57,6 +57,7 @@ class EventFragment : Fragment() {
     var imageFilePath:String? = null
     var gps: GPSTracker? = null
     var location: String? = null
+    var staticSpinner: Spinner? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -138,7 +139,11 @@ class EventFragment : Fragment() {
     }
 
     fun declareItems(view: View) {
-
+        staticSpinner = view.findViewById(R.id.static_spinner) as Spinner
+        val staticAdapter = ArrayAdapter.createFromResource(context!!, R.array.type_array, android.R.layout.simple_spinner_item)
+        staticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        staticSpinner!!.adapter = staticAdapter
+        staticSpinner!!.setSelection(0)
     }
 
     private fun getCompleteAddressString(LATITUDE: Double, LONGITUDE: Double): String? {
@@ -207,16 +212,29 @@ class EventFragment : Fragment() {
             obj.put("latitude", latitude);
             obj.put("longitude", longitude);
             obj.put("description", description.text);
+            obj.put("type",staticSpinner!!.selectedItemPosition)
 
             if (imageFilePath != null) {
                 obj.put("photo", getFileToByte(imageFilePath))
                 obj.put("image", System.currentTimeMillis().toString() + ".jpg")
             }
 
-            var payload = Base64.encodeToString(obj.toString().toByteArray(charset("UTF-8")), Base64.DEFAULT)
-
+            var payload = Base64.encodeToString(
+                obj.toString().toByteArray(charset("UTF-8")),
+                Base64.DEFAULT
+            )
 
             val token = (activity as NavigationHost).getAuthenticationToken()
+
+            if(token == null){
+                (activity as NavigationHost).customToaster(
+                    title = getString(R.string.toast_info),
+                    message = getString(R.string.no_login),
+                    type= "info"
+                );
+                (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+            }
+
 
             val call = request.insertEvent(payload = payload, token!!)
 
@@ -224,20 +242,28 @@ class EventFragment : Fragment() {
                 override fun onResponse(call: Call<Event>?, response: Response<Event>?) {
                     Log.e("response", response.toString())
                     if (response!!.isSuccessful) {
-                        (activity as NavigationHost).customToaster(getString(R.string.event_created), "ic_checked", Toast.LENGTH_LONG)
+                        (activity as NavigationHost).customToaster(
+                            title = getString(R.string.toast_success),
+                            message = getString(R.string.event_created),
+                            type= "success"
+                        );
                         activity?.onBackPressed()
                     } else {
-                        if (response.code() == 403 && response.message() == "login_fail") {
-
-                        } else {
-
-                        }
+                        (activity as NavigationHost).customToaster(
+                            title = getString(R.string.toast_error),
+                            message = getString(R.string.general_error),
+                            type= "connection"
+                        );
                     }
 
                 }
 
                 override fun onFailure(call: Call<Event>?, t: Throwable?) {
-                    Log.e("failerr", t!!.message!!)
+                    (activity as NavigationHost).customToaster(
+                        title = getString(R.string.toast_error),
+                        message = getString(R.string.general_error),
+                        type= "connection"
+                    );
                 }
             })
         }
