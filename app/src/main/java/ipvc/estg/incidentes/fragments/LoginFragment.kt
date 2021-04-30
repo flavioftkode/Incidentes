@@ -13,7 +13,6 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import com.google.android.material.textfield.TextInputLayout
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.User
 import ipvc.estg.incidentes.navigation.NavigationHost
@@ -86,34 +85,57 @@ class LoginFragment : Fragment() {
                 obj.put("username", username);
                 obj.put("password", password);
                 payload = obj.toString()
-                payload = Base64.encodeToString(payload?.toByteArray(charset("UTF-8")), Base64.DEFAULT)
-                Log.e("payload",payload.toString())
+                payload = Base64.encodeToString(
+                    payload?.toByteArray(charset("UTF-8")),
+                    Base64.DEFAULT
+                )
+
+                Log.e("payload", payload.toString())
                 val request = ServiceBuilder.buildService(EndPoints::class.java)
-                val call = request.loginUser(payload=payload!!)
+                val call = request.loginUser(payload = payload!!)
 
                 call.enqueue(object : Callback<User> {
                     override fun onResponse(call: Call<User>?, response: Response<User>?) {
                         if (response!!.isSuccessful) {
 
-                            (activity as NavigationHost).customToaster(getString(R.string.login_success), "logo_small",Toast.LENGTH_LONG);
+                            (activity as NavigationHost).customToaster(
+                                title = getString(R.string.toast_success),
+                                message = getString(R.string.login_success),
+                                type= "success"
+                            );
 
                             if (rememberMe!!.isChecked) {
-                                val rememberMe: SharedPreferences = context!!.getSharedPreferences("REMEMBER", Context.MODE_PRIVATE)
-                               rememberMe.edit().putString("username", "response").apply()
+                                val rememberMe: SharedPreferences = context!!.getSharedPreferences(
+                                    "REMEMBER",
+                                    Context.MODE_PRIVATE
+                                )
+                                rememberMe.edit().putString("username", "response").apply()
                             } else {
-                                val rememberMe: SharedPreferences = context!!.getSharedPreferences("REMEMBER", Context.MODE_PRIVATE)
+                                val rememberMe: SharedPreferences = context!!.getSharedPreferences(
+                                    "REMEMBER",
+                                    Context.MODE_PRIVATE
+                                )
                                 rememberMe.edit().clear().apply()
                             }
-                            val rememberMe: SharedPreferences = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
+                            val rememberMe: SharedPreferences = context!!.getSharedPreferences(
+                                "AUTHENTICATION",
+                                Context.MODE_PRIVATE
+                            )
                             rememberMe.edit().putInt("iduser", response.body().id).apply()
-                            rememberMe.edit().putString("_token", response.body()._token).apply()
+                            rememberMe.edit().putString("_token", "Bearer "+response.body()._token).apply()
+
+                            Log.e("_token", response.body()._token)
                             activity?.onBackPressed()
-                        }else{
-                            if(response.code() == 403 && response.message() == "login_fail"){
+                        } else {
+                            if (response.code() == 403 && response.message() == "login_fail") {
                                 username_text_input.error = getString(R.string.wrong_user_info)
                                 password_text_input.error = getString(R.string.wrong_user_info)
-                            }else{
-                                (activity as NavigationHost).customToaster(getString(R.string.login_fail), "ic_error_small",Toast.LENGTH_LONG);
+                            } else {
+                                (activity as NavigationHost).customToaster(
+                                    title = getString(R.string.toast_error),
+                                    message = getString(R.string.general_error),
+                                    type= "connection"
+                                );
                             }
                         }
                         progress_bar_frame.visibility = View.GONE
@@ -124,12 +146,19 @@ class LoginFragment : Fragment() {
                         progress_bar_frame.visibility = View.GONE
                         btnLogin!!.isEnabled = true
 
-                        val rememberMe: SharedPreferences = context!!.getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
-                        rememberMe.edit().putInt("iduser", 1).apply()
-                        rememberMe.edit().putString("_token", "asdfa").apply()
+                        val rememberMe: SharedPreferences = context!!.getSharedPreferences(
+                            "AUTHENTICATION",
+                            Context.MODE_PRIVATE
+                        )
+                        rememberMe.edit().putInt("iduser", 0).apply()
+                        rememberMe.edit().putString("_token", "").apply()
                         activity?.onBackPressed()
 
-                        (activity as NavigationHost).customToaster(getString(R.string.login_fail), "ic_error_small",Toast.LENGTH_LONG);
+                        (activity as NavigationHost).customToaster(
+                            title = getString(R.string.toast_error),
+                            message = getString(R.string.general_error),
+                            type= "connection"
+                        );
                     }
                 })
             }

@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import com.allyants.notifyme.NotifyMe
@@ -24,6 +25,7 @@ import ipvc.estg.incidentes.fragments.*
 import ipvc.estg.incidentes.navigation.NavigationHost
 import kotlinx.android.synthetic.main.in_backdrop.*
 import kotlinx.android.synthetic.main.in_backdrop.view.*
+import www.sanju.motiontoast.MotionToast
 import java.util.*
 
 
@@ -49,13 +51,13 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
                 fragment.arguments = bundle
                 supportFragmentManager
                     .beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragment,"notes")
                     .commit()
             }
         }else{
             supportFragmentManager
                 .beginTransaction()
-                .add(R.id.container, HomeFragment())
+                .add(R.id.container, HomeFragment(),"home")
                 .commit()
         }
 
@@ -276,8 +278,8 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
          fragment.unsetNotification();
     }
 
-    override fun customToaster(message: String, drawable: String, duration: Int){
-        val inflater = layoutInflater
+    override fun customToaster(message: String,title: String,type: String){
+        /*val inflater = layoutInflater
         val layout: View = inflater.inflate(
             R.layout.custom_toast,
             findViewById<LinearLayout>(R.id.custom_toast_container)
@@ -294,16 +296,54 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
         val toast = Toast(applicationContext)
         toast.duration = duration
         toast.view = layout
-        toast.show()
+        toast.show()*/
+        var toastType =  MotionToast.TOAST_SUCCESS;
+        if(type == "success"){
+            toastType = MotionToast.TOAST_SUCCESS;
+        }else if(type == "error"){
+            toastType = MotionToast.TOAST_ERROR;
+        }else if(type == "warning"){
+            toastType = MotionToast.TOAST_WARNING;
+        }else if(type == "info"){
+            toastType = MotionToast.TOAST_INFO;
+        }else if(type == "delete"){
+            toastType = MotionToast.TOAST_DELETE;
+        }else if(type == "connection"){
+            toastType = MotionToast.TOAST_NO_INTERNET;
+        }
+
+        MotionToast.darkToast( this,
+            title,
+            message,
+            toastType,
+            MotionToast.GRAVITY_BOTTOM,
+            MotionToast.LONG_DURATION,
+            ResourcesCompat.getFont(this,R.font.helvetica_regular))
     }
 
     override fun getAuthenticationToken(): String? {
         val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
-        return "Bearer " +sharedPref.getString("_token", null)
+        return sharedPref.getString("_token", null)
     }
 
     override fun getAuthenticationUserId(): Int? {
         val sharedPref = getSharedPreferences("AUTHENTICATION", MODE_PRIVATE)
         return sharedPref.getInt("iduser", 0)
+    }
+
+    override fun setConsent() {
+        val preferences: SharedPreferences = getSharedPreferences("CONSENT", Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putInt("isConsentCheck", 1)
+        editor.apply()
+    }
+
+    override fun getConsentStatus(): Boolean {
+        val sharedPref = getSharedPreferences("CONSENT", MODE_PRIVATE)
+        return sharedPref.getInt("isConsentCheck", 0) == 1
+    }
+
+    override fun reloadMarkers() {
+
     }
 }

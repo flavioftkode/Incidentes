@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cpb_white"
+    android:fillViewport="true"
+    tools:context="fragments.EventDetailFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        app:elevation="100dp"
+        android:padding="0dp"
+        android:paddingTop="0dp">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="100dp">
+
+            <androidx.appcompat.widget.Toolbar
+                app:elevation="100dp"
+                android:id="@+id/close_event"
+                style="@style/Widget.Shrine.Toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:backgroundTint="@color/white"
+                android:paddingStart="12dp"
+                android:paddingLeft="12dp"
+                android:paddingEnd="12dp"
+                android:paddingRight="12dp"
+                app:contentInsetStart="-10dp"
+                app:navigationIcon="@drawable/in_close"
+                app:title="@string/event_title" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:fillViewport="true"
+            android:layout_below="@+id/app_bar"
+            android:elevation="-10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout
+                android:paddingStart="25dp"
+                android:paddingEnd="25dp"
+                android:paddingBottom="25dp"
+                android:paddingTop="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+                <LinearLayout
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintLeft_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:id="@+id/number_color"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                        android:textColor="@color/white" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_below="@+id/number_color"
+                    android:id="@+id/status_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/status_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/single_status"
+                        android:paddingRight="2dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/Black" />
+
+                    <TextView
+                        android:id="@+id/status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/success" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_below="@+id/status_layout"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:id="@+id/layout_date"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/date_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/single_date_time"
+                        android:paddingEnd="2dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/Black" />
+
+                    <TextView
+                        android:id="@+id/date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/event_location"
+                    android:layout_below="@+id/layout_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/event_location"
+                    android:gravity="start"
+                    android:textStyle="bold"/>
+
+                <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+                    android:layout_below="@+id/event_location"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:id="@+id/map_lite"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    map:cameraZoom="5"
+                    map:mapType="normal"
+                    map:liteMode="true"/>
+
+                <TextView
+                    android:layout_below="@+id/map_lite"
+                    android:id="@+id/address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:text="@string/event_type"
+                    android:layout_below="@+id/address"
+                    android:id="@+id/type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <Spinner
+                    android:layout_below="@+id/type"
+                    android:id="@+id/static_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp" />
+
+
+                <TextView
+                    android:id="@+id/single_description"
+                    android:layout_below="@+id/static_spinner"
+                    android:text="@string/single_description"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_below="@+id/single_description"
+                    android:id="@+id/description_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/description"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:inputType="text|textMultiLine"
+                        android:lines="4"
+                        android:maxLines="10"
+                        android:minLines="4"
+                        android:hint="@string/event_comment"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/event_image"
+                    android:layout_below="@+id/description_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/event_image"
+                    android:gravity="start"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_below="@+id/event_image"
+                    android:id="@+id/no_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="@string/event_no_image"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:layout_gravity="center_horizontal"/>
+
+
+                <ImageView
+                    android:layout_below="@+id/event_image"
+                    android:scaleType="fitStart"
+                    android:adjustViewBounds="true"
+                    android:id="@+id/image_camera"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+
+            </RelativeLayout>
+        </androidx.core.widget.NestedScrollView>
+        <com.google.android.material.button.MaterialButton
+            android:visibility="gone"
+            android:id="@+id/save_event"
+            style="@style/ButtonCornerLeftTop"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_gravity="end|bottom"
+            android:backgroundTint="@color/colorPrimary"
+            android:elevation="8dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingStart="25dp"
+            app:iconSize="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:text="@string/save_note"
+            android:textColor="@color/cpb_white"
+            app:iconTint="@color/white"
+            app:strokeColor="@color/colorPrimary" />
+
+    </RelativeLayout>
+</FrameLayout>

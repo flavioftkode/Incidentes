@@ -14,5 +14,7 @@ class Event(
     val photo: String,
     val photo_finish: String,
     var latitude: Double,
-    var longitude: Double
+    var longitude: Double,
+    var type: Int,
+    val user_id: Int,
 )

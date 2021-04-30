@@ -65,4 +65,50 @@
     <string name="event_no_image">Sem imagem</string>
     <string name="event_image">Imagem</string>
     <string name="create_event">Registar incidente</string>
+    <string name="no_login">É necessário login para realizar esta ação</string>
+    <string name="consent_title">Consentimento</string>
+    <string name="consent_body">Mensagem</string>
+    <string name="consent_checkbox_1">Concordo 1</string>
+    <string name="consent_checkbox_2">Concordo 2</string>
+    <string name="consent_needed">É necessario o seu consentimento para continuar</string>
+
+    <!--Event detail fragment-->
+    <string name="single_status">Estado:</string>
+    <string name="single_date_time">Data/hora:</string>
+    <string name="single_description">Descrição</string>
+    <string name="event_title">Incidente</string>
+    <string name="navigation_event_edit">Editar evento</string>
+    <string name="navigation_event_view">Ver evento</string>
+    <string name="navigation_event_cancel">Cancelar</string>
+    <string name="event_type">Tipo de incidente</string>
+    <string name="toast_success">Sucesso</string>
+    <string name="toast_info">Informação</string>
+    <string name="toast_error">Erro</string>
+    <string name="toast_warning">Aviso</string>
+    <string name="marker_not_in_area">Marcador fora da area permitida</string>
+    <string name="general_error">Oops, parece que ocorreu um erro. Verifique a sua coneção á internet e tente novamente</string>
+    <string name="event_updated">Incidente atualizado.</string>
+    <string name="event_deleted">Incidente cancelado.</string>
+    <string name="filter_radius">Distância (m) (default:0)</string>
+    <string name="filter_other">Outro</string>
+    <string name="filter_checkbox_4">Levantamento de residos</string>
+    <string name="filter_checkbox_3">Derrames na via</string>
+    <string name="filter_checkbox_2">Lixo na via</string>
+    <string name="filter_checkbox_1">Danos na via</string>
+    <string name="filter_title">Filtrar mapa</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_remember">Lembrar</string>
+    <string name="login_btn">Login</string>
+    <string name="login_divider">ou</string>
+    <string name="login_create">Criar conta</string>
+    <string name="login_recover">Recuperar password</string>
+
+    <string-array name="type_array">
+        <item>Danos na via</item>
+        <item>Lixo na via</item>
+        <item>Derrames na via</item>
+        <item>Levantamento de residos</item>
+        <item>Outros</item>
+    </string-array>
 </resources>

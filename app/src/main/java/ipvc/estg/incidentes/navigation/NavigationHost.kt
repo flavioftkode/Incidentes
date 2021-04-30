@@ -35,11 +35,17 @@ interface NavigationHost {
 
     fun cancelNotification(id:Int)
 
-    fun customToaster(message:String,drawable: String,duration: Int)
+    fun customToaster(message:String,title: String,type:String)
 
     fun isUserLogged(): Boolean?
 
     fun getAuthenticationUserId(): Int?
 
     fun getAuthenticationToken(): String?
+
+    fun setConsent()
+
+    fun getConsentStatus(): Boolean?
+
+    fun reloadMarkers()
 }
