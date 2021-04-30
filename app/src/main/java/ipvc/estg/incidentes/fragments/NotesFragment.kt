@@ -136,7 +136,8 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
             (activity as NavigationHost).navigateTo(
                 HomeFragment(),
                 addToBackstack = false,
-                animate = true
+                animate = true,
+                "home"
             )
         }
 

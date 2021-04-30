@@ -6,22 +6,19 @@ import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.RelativeLayout
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -42,13 +39,17 @@ import ipvc.estg.incidentes.listeners.NavigationIconClickListener
 import ipvc.estg.incidentes.navigation.NavigationHost
 import ipvc.estg.incidentes.retrofit.EndPoints
 import ipvc.estg.incidentes.retrofit.ServiceBuilder
-import ipvc.estg.incidentes.services.GPSTracker
+import ipvc.estg.incidentes.services.GPSTracker2
 import ipvc.estg.incidentes.services.MarkerClusterRenderer
+import kotlinx.android.synthetic.main.in_backdrop.*
 import kotlinx.android.synthetic.main.in_backdrop.view.*
+import kotlinx.android.synthetic.main.in_event_fragment.*
+import kotlinx.android.synthetic.main.in_filter_fragment.view.*
 import kotlinx.android.synthetic.main.in_home_fragment.*
 import kotlinx.android.synthetic.main.in_home_fragment.view.*
 import kotlinx.android.synthetic.main.in_login_fragment.*
 import kotlinx.android.synthetic.main.in_main_activity.view.*
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -62,7 +63,7 @@ import kotlin.system.exitProcess
  */
 class HomeFragment : Fragment(), View.OnClickListener {
     var clusterManager: ClusterManager<MyMarker?>? = null
-    var gps: GPSTracker? = null
+    var gps: GPSTracker2? = null
     private var _token: String? = null
     private var _userId: Int? = null
     private var mMapView: MapView? = null
@@ -187,6 +188,29 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var received = true
     var finished = false
     var progress = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
+        menu.clear()
+        super.onCreateOptionsMenu(menu, menuInflater)
+        menuInflater.inflate(R.menu.in_map_toolbar, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.event_filter -> {
+                (activity as NavigationHost).showFilters();
+                true
+            }
+            else -> false
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -197,6 +221,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         _token = authenticationToken
         _userId = authenticationUserId
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
+
 
         logged = (activity as NavigationHost).isUserLogged()
 
@@ -228,6 +253,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+
         return view
     }
 
@@ -308,15 +335,27 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
+
     override fun onResume() {
         super.onResume()
-        if(!(activity as NavigationHost).getConsentStatus()!! && (_token != null && _token != "Bearer" && _userId != 0)){
-            (activity as NavigationHost).navigateTo(ConsentFragment(),addToBackstack = false,animate = true,tag="consent")
+        Log.e("resume", "resume")
+        activity!!.invalidateOptionsMenu();
+        if(gps != null){
+            gps!!.startUsingGPS();
+        }
+
+        if(!(activity as NavigationHost).getConsentStatus()!! && (_token != null && _token != null && _userId != 0)){
+            (activity as NavigationHost).navigateTo(
+                ConsentFragment(),
+                addToBackstack = false,
+                animate = true,
+                tag = "consent"
+            )
         }
         /*map_loading.visibility = View.VISIBLE;*/
         //activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
         if (mMap != null) {
-            mMap!!.clear()
+            //mMap!!.clear()
             myMarkers.clear()
             getMarkers()
         }
@@ -325,7 +364,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onPause() {
         super.onPause()
         //activity!!.unregisterReceiver(mNotificationReceiver)
+        if(gps != null){
+            gps!!.stopUsingGPS();
+        }
+
     }
+
 
     private val mNotificationReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -393,19 +437,22 @@ class HomeFragment : Fragment(), View.OnClickListener {
         view.refresh_home.setOnRefreshListener {
             getMarkers()
         }
+        myLocation
     }
 
     override fun onClick(v: View) {
         if (v === btnTrash) {
+
+            Log.e("location", LatLng(gps!!.getLatitude(), gps!!.getLongitude()).toString())
             btnTrash!!.isEnabled = false
             //btnTrash!!.showLoading()
             Log.e("token", _token.toString())
             Log.e("_userId", _userId.toString())
-            if (_token == null || _token == "Bearer" || _userId == 0) {
+            if (_token == null || _userId == 0) {
                 (activity as NavigationHost).customToaster(
-                    getString(R.string.no_login),
-                    "ic_error_small",
-                    Toast.LENGTH_LONG
+                    title = getString(R.string.toast_info),
+                    message = getString(R.string.no_login),
+                    type = "info"
                 );
                 goToLogin()
             } else {
@@ -429,15 +476,32 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     startActivity(intent)*/
                 } else if (isLocationEnabled(context)) {
                     bundle.putBoolean("mMarker", false)
-                    if (mMap != null && PolyUtil.containsLocation(myLocation, hole, true)) {
-                        myLocation
+                    if (mMap != null && PolyUtil.containsLocation(
+                            LatLng(
+                                gps!!.getLatitude(),
+                                gps!!.getLongitude()
+                            ), hole, true
+                        )) {
                         mMarker = mMap!!.addMarker(
-                            MarkerOptions().position(myLocation).draggable(
-                                true
-                            ).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
+                            MarkerOptions().position(
+                                LatLng(
+                                    gps!!.getLatitude(),
+                                    gps!!.getLongitude()
+                                )
+                            ).draggable(true)
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
                         )
-                        Toast.makeText(context, "placed"/*getString("placed")*/, Toast.LENGTH_LONG)
-                            .show()
+                        /*Toast.makeText(context, "placed"*//*getString("placed")*//*, Toast.LENGTH_LONG).show()*/
+                        bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
+                        bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
+                        bundle.putBoolean("mMarker", true)
+                        (activity as NavigationHost).navigateToWithData(
+                            EventFragment(),
+                            addToBackstack = true,
+                            animate = true,
+                            "event",
+                            bundle
+                        )
                     } else if (mMarker != null) {
                         bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                         bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
@@ -450,11 +514,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             bundle
                         )
                     } else {
-                        Toast.makeText(
-                            context,
-                            /*getString(R.string.not_in_the_area)*/"not in area",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        (activity as NavigationHost).customToaster(
+                            title = getString(R.string.toast_warning),
+                            message = getString(R.string.marker_not_in_area),
+                            type = "warning"
+                        );
                     }
                 } else {
                     promptTurnGPS()
@@ -523,7 +587,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     googleMap.uiSettings.isMyLocationButtonEnabled = true
                     googleMap.uiSettings.isMapToolbarEnabled = false
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(portugal, 14.3f))
-                    myLocation
                     mMap = googleMap
                     setUpClusterManager()
                     mMap!!.setOnMapClickListener { point ->
@@ -545,11 +608,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             dragLon = mMarker!!.position.longitude
                         } else {
                             (activity as NavigationHost).customToaster(
-                               "Marcador fora da area permitida",
-                                "ic_error_small",
-                                Toast.LENGTH_LONG
+                                title = getString(R.string.toast_warning),
+                                message = getString(R.string.marker_not_in_area),
+                                type = "warning"
                             );
-                           /* Toast.makeText(context, "Marcador fora da area permitida", Toast.LENGTH_SHORT).show()*/
                         }
                     }
                     mMap!!.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
@@ -588,7 +650,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
                                         mMap!!.cameraPosition.zoom
                                     )
                                 )
-                                Toast.makeText(context, "invalide", Toast.LENGTH_SHORT).show()
+                                (activity as NavigationHost).customToaster(
+                                    title = getString(R.string.toast_warning),
+                                    message = getString(R.string.marker_not_in_area),
+                                    type = "warning"
+                                );
                             }
                         }
                     })
@@ -609,9 +675,26 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     /*GET ALL MARKERS*/
     fun getMarkers(){
-        Log.e("markers","getmarkers")
+
+        val preferences: SharedPreferences = context!!.getSharedPreferences(
+            "FILTERMAP",
+            Context.MODE_PRIVATE
+        )
+        var radius = preferences.getInt("radius", 0)
+        val obj = JSONObject()
+        obj.put("0", preferences.getBoolean("0", true));
+        obj.put("1", preferences.getBoolean("1", true));
+        obj.put("2", preferences.getBoolean("2", true));
+        obj.put("3", preferences.getBoolean("3", true));
+        obj.put("4", preferences.getBoolean("4", true));
+
+        var payload = Base64.encodeToString(
+            obj.toString().toByteArray(charset("UTF-8")),
+            Base64.DEFAULT
+        )
+        Log.e("payload", payload)
         val request = ServiceBuilder.buildService(EndPoints::class.java)
-        val call = request.getCluster()
+        val call = request.getCluster(payload)
 
         call.enqueue(object : Callback<List<MyMarker>> {
             override fun onResponse(
@@ -625,22 +708,45 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     try {
                         response.body().forEach {
 
-                                val myMarker = MyMarker(
-                                    id = it.id,
-                                    latitude = it.latitude,
-                                    longitude = it.longitude,
-                                    latLng = LatLng(it.latitude, it.longitude),
-                                    status = it.status,
-                                    location = it.location,
-                                    number = it.location,
-                                    date = it.date,
-                                    time = it.time,
-                                    description = it.description,
-                                    photo = it.photo,
-                                    photo_finish = it.photo,
-                                    user_id = it.user_id
-                                )
+                            val myMarker = MyMarker(
+                                id = it.id,
+                                latitude = it.latitude,
+                                longitude = it.longitude,
+                                latLng = LatLng(it.latitude, it.longitude),
+                                status = it.status,
+                                location = it.location,
+                                number = it.location,
+                                date = it.date,
+                                time = it.time,
+                                description = it.description,
+                                photo = it.photo,
+                                photo_finish = it.photo,
+                                user_id = it.user_id,
+                                type = it.type
+                            )
+
+
+                            if (radius != 0) {
+                                val locationA = Location("me")
+
+                                locationA.latitude = gps!!.getLatitude()
+                                locationA.longitude =  gps!!.getLongitude()
+
+                                val locationB = Location("marker")
+
+                                locationB.latitude = myMarker.latitude
+                                locationB.longitude = myMarker.longitude
+                                val distance: Float = locationA.distanceTo(locationB)
+                                Log.e("distance",distance.toString())
+                                Log.e("locationA",locationA.toString())
+                                Log.e("locationB",locationB.toString())
+                                if(distance < radius){
+                                    myMarkers.add(myMarker)
+                                }
+                            }else{
                                 myMarkers.add(myMarker)
+                            }
+
 
                         }
                     } catch (e: Exception) {
@@ -656,12 +762,22 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     clusterManager!!.clearItems()
                     clusterManager!!.addItems(myMarkers as Collection<MyMarker?>?) // 4
                     clusterManager!!.cluster()
+                } else {
+                    (activity as NavigationHost).customToaster(
+                        title = getString(R.string.toast_error),
+                        message = getString(R.string.general_error),
+                        type = "error"
+                    );
                 }
                 refresh_home!!.isRefreshing = false
             }
 
             override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                (activity as NavigationHost).customToaster(t!!.message.toString(), "ic_error_small", Toast.LENGTH_LONG);
+                (activity as NavigationHost).customToaster(
+                    title = getString(R.string.toast_error),
+                    message = getString(R.string.general_error),
+                    type = "connection"
+                );
                 refresh_home!!.isRefreshing = false
             }
 
@@ -670,101 +786,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val myLocation: LatLng
         get() {
-            gps = GPSTracker(context!!)
+            gps = GPSTracker2(context!!)
             return LatLng(gps!!.getLatitude(), gps!!.getLongitude())
         }
 
-   /* private fun volleyService(queue: RequestQueue) {
-        val stringRequest: StringRequest = object : StringRequest(
-            Method.POST, URL,
-            Response.Listener { response ->
-                try {
-                    myMarkers.clear()
-                    val `val` = JSONObject(response)
-                    val jsonMainNode = `val`.getJSONArray("data")
-                    eventCounter = 0
-                    while (eventCounter < jsonMainNode.length()) {
-                        val jsonFirstIndex = jsonMainNode.getJSONObject(eventCounter)
-                        val id = jsonFirstIndex.optInt("id_incidente")
-                        val latitude = jsonFirstIndex.optDouble("latitude")
-                        val longitude = jsonFirstIndex.optDouble("longitude")
-                        val status = jsonFirstIndex.optInt("estado")
-                        val location = jsonFirstIndex.optString("localizacao")
-                        val n_incidente = jsonFirstIndex.optString("n_incidente")
-                        val date = jsonFirstIndex.optString("data_incidente")
-                        val time = jsonFirstIndex.optString("hora_incidente")
-                        val description = jsonFirstIndex.optString("descricao")
-                        val photo = jsonFirstIndex.optString("foto")
-                        val photo_finish = jsonFirstIndex.optString("foto_recolha")
-                        Log.d("JSON", jsonFirstIndex.toString())
-                        val myMarker = MyMarker(
-                            id,
-                            LatLng(latitude, longitude),
-                            status,
-                            location,
-                            n_incidente,
-                            date,
-                            time,
-                            description,
-                            photo,
-                            photo_finish
-                        )
-                        if (received && status == 0) {
-                            myMarkers.add(myMarker)
-                        } else if (finished && status == 1) {
-                            myMarkers.add(myMarker)
-                        } else if (progress && status == 2 || progress && status == 3) {
-                            myMarkers.add(myMarker)
-                        }
-                        eventCounter++
-                    }
-                    clusterManager.setRenderer(MarkerClusterRenderer(context, mMap, clusterManager))
-                    mMap.setOnCameraIdleListener(clusterManager)
-                    clusterManager.clearItems()
-                    clusterManager.addItems(myMarkers) // 4
-                    clusterManager.cluster()
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-            },
-            Response.ErrorListener { volleyError ->
-                var message = ""
-                if (volleyError is NetworkError) {
-                    message = getString(R.string.network_error)
-                } else if (volleyError is ServerError) {
-                    message = getString(R.string.server_error)
-                } else if (volleyError is AuthFailureError) {
-                    message = getString(R.string.auth_failure_error)
-                    clearAuthentication()
-                    disconnectFromFacebook()
-                    activity!!.finish()
-                    startActivity(activity!!.intent)
-                } else if (volleyError is ParseError) {
-                    message = getString(R.string.parsing_error)
-                } else if (volleyError is NoConnectionError) {
-                    message = getString(R.string.no_connection_error)
-                } else if (volleyError is TimeoutError) {
-                    message = getString(R.string.time_out_error)
-                }
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            }) {
-            override fun getParams(): Map<String, String> {
-                val params: MutableMap<String, String> = HashMap()
-                params["token"] = _token!!
-                params["method"] = "GET_BY_CIDADAO"
-                params["id_cidadao"] = _userId!!
-                params["user_id"] = _userId!!
-                return params
-            }
-        }
-        stringRequest.retryPolicy =
-            DefaultRetryPolicy(
-                0,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-            )
-        queue.add(stringRequest)
-    }*/
+
 
     companion object {
         var eventCounter = 0

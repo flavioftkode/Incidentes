@@ -99,9 +99,9 @@ class LoginFragment : Fragment() {
                         if (response!!.isSuccessful) {
 
                             (activity as NavigationHost).customToaster(
-                                getString(R.string.login_success),
-                                "logo_small",
-                                Toast.LENGTH_LONG
+                                title = getString(R.string.toast_success),
+                                message = getString(R.string.login_success),
+                                type= "success"
                             );
 
                             if (rememberMe!!.isChecked) {
@@ -122,7 +122,7 @@ class LoginFragment : Fragment() {
                                 Context.MODE_PRIVATE
                             )
                             rememberMe.edit().putInt("iduser", response.body().id).apply()
-                            rememberMe.edit().putString("_token", response.body()._token).apply()
+                            rememberMe.edit().putString("_token", "Bearer "+response.body()._token).apply()
 
                             Log.e("_token", response.body()._token)
                             activity?.onBackPressed()
@@ -132,9 +132,9 @@ class LoginFragment : Fragment() {
                                 password_text_input.error = getString(R.string.wrong_user_info)
                             } else {
                                 (activity as NavigationHost).customToaster(
-                                    getString(R.string.login_fail),
-                                    "ic_error_small",
-                                    Toast.LENGTH_LONG
+                                    title = getString(R.string.toast_error),
+                                    message = getString(R.string.general_error),
+                                    type= "connection"
                                 );
                             }
                         }
@@ -155,9 +155,9 @@ class LoginFragment : Fragment() {
                         activity?.onBackPressed()
 
                         (activity as NavigationHost).customToaster(
-                            getString(R.string.login_fail),
-                            "ic_error_small",
-                            Toast.LENGTH_LONG
+                            title = getString(R.string.toast_error),
+                            message = getString(R.string.general_error),
+                            type= "connection"
                         );
                     }
                 })

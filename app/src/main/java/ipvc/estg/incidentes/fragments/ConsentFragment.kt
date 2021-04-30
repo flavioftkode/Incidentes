@@ -30,9 +30,9 @@ class ConsentFragment : Fragment() {
                 (activity as NavigationHost).navigateTo(HomeFragment(), addToBackstack = false, animate = true, "home")
             }else{
                 (activity as NavigationHost).customToaster(
-                    getString(R.string.consent_needed),
-                    "ic_error_small",
-                    Toast.LENGTH_LONG
+                    title = getString(R.string.toast_warning),
+                    message = getString(R.string.consent_needed),
+                    type= "warning"
                 );
             }
         }
