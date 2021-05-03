@@ -155,7 +155,7 @@ class NotesFragment : Fragment(), RecyclerItemTouchHelper.RecyclerItemTouchHelpe
 
         view!!.in_auth.setOnClickListener {
             if(logged!!){
-                (activity as NavigationHost).logout(NotesFragment())
+                (activity as NavigationHost).logout(NotesFragment(),"notes")
             }else{
                 (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
             }

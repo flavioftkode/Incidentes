@@ -5,14 +5,21 @@ import android.R.attr.*
 import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Context.SENSOR_SERVICE
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
@@ -23,12 +30,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.*
-import com.google.android.material.button.MaterialButton
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.algo.Algorithm
@@ -68,7 +75,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private var _userId: Int? = null
     private var mMapView: MapView? = null
     private var mMap: GoogleMap? = null
-    var btnTrash: MaterialButton? = null
+    var btnTrash: CircularProgressButton? = null
     private var mMarker: Marker? = null
     var url:String? = null
     var options: PolygonOptions? = null
@@ -188,11 +195,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var received = true
     var finished = false
     var progress = false
+    private lateinit var sensorManager: SensorManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
+        sensorManager = activity!!.getSystemService(SENSOR_SERVICE) as SensorManager
+        val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        if (lightSensor != null) {
+            sensorManager.registerListener(
+                lightSensorListener,
+                lightSensor,
+                SensorManager.SENSOR_DELAY_NORMAL
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -405,7 +421,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         btnTrash!!.setOnClickListener(this)
         view!!.in_auth.setOnClickListener {
             if(logged!!){
-                (activity as NavigationHost).logout(HomeFragment())
+                (activity as NavigationHost).logout(HomeFragment(), "home")
             }else{
                 (activity as NavigationHost).navigateTo(
                     LoginFragment(),
@@ -426,6 +442,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private fun declareItems(view: View?) {
         btnTrash = view!!.findViewById(R.id.call_trash)
+        btnTrash!!.setBackgroundResource(R.drawable.shapeleft);
         context?.let { ContextCompat.getColor(it, R.color.cpb_blue_light) }?.let {
             view.refresh_home!!.setColorSchemeColors(
                 it,
@@ -438,6 +455,44 @@ class HomeFragment : Fragment(), View.OnClickListener {
             getMarkers()
         }
         myLocation
+
+
+    }
+
+    private fun failed(){
+        btnTrash!!.isEnabled = true
+        btnTrash!!.doneLoadingAnimation(
+            R.color.transparent, BitmapFactory.decodeResource(
+                resources,
+                R.drawable.error
+            )
+        )
+
+        Handler().postDelayed(
+            Runnable
+            {
+                btnTrash!!.revertAnimation();
+                btnTrash!!.setBackgroundResource(R.drawable.shapeleft);
+            }, 10 * 100
+        )
+    }
+
+    private fun success(){
+        btnTrash!!.isEnabled = true
+        btnTrash!!.doneLoadingAnimation(
+            R.color.transparent, BitmapFactory.decodeResource(
+                resources,
+                R.drawable.done
+            )
+        )
+
+        Handler().postDelayed(
+            Runnable
+            {
+                btnTrash!!.revertAnimation();
+                btnTrash!!.setBackgroundResource(R.drawable.shapeleft);
+            }, 10 * 100
+        )
     }
 
     override fun onClick(v: View) {
@@ -445,6 +500,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
             Log.e("location", LatLng(gps!!.getLatitude(), gps!!.getLongitude()).toString())
             btnTrash!!.isEnabled = false
+            btnTrash!!.startAnimation();
             //btnTrash!!.showLoading()
             Log.e("token", _token.toString())
             Log.e("_userId", _userId.toString())
@@ -454,6 +510,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     message = getString(R.string.no_login),
                     type = "info"
                 );
+                success()
                 goToLogin()
             } else {
                 val bundle = Bundle()
@@ -462,6 +519,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                     bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
                     bundle.putBoolean("mMarker", true)
+                    success()
                     (activity as NavigationHost).navigateToWithData(
                         EventFragment(),
                         addToBackstack = true,
@@ -495,6 +553,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                         bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
                         bundle.putBoolean("mMarker", true)
+                        success()
                         (activity as NavigationHost).navigateToWithData(
                             EventFragment(),
                             addToBackstack = true,
@@ -506,6 +565,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         bundle.putDouble("mMarker_lat", mMarker!!.position.latitude)
                         bundle.putDouble("mMarker_long", mMarker!!.position.longitude)
                         bundle.putBoolean("mMarker", true)
+                        success()
                         (activity as NavigationHost).navigateToWithData(
                             EventFragment(),
                             addToBackstack = true,
@@ -519,6 +579,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             message = getString(R.string.marker_not_in_area),
                             type = "warning"
                         );
+                        failed()
                     }
                 } else {
                     promptTurnGPS()
@@ -588,6 +649,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     googleMap.uiSettings.isMapToolbarEnabled = false
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(portugal, 14.3f))
                     mMap = googleMap
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
                     setUpClusterManager()
                     mMap!!.setOnMapClickListener { point ->
                         if (PolyUtil.containsLocation(point, hole, true)) {
@@ -730,20 +792,20 @@ class HomeFragment : Fragment(), View.OnClickListener {
                                 val locationA = Location("me")
 
                                 locationA.latitude = gps!!.getLatitude()
-                                locationA.longitude =  gps!!.getLongitude()
+                                locationA.longitude = gps!!.getLongitude()
 
                                 val locationB = Location("marker")
 
                                 locationB.latitude = myMarker.latitude
                                 locationB.longitude = myMarker.longitude
                                 val distance: Float = locationA.distanceTo(locationB)
-                                Log.e("distance",distance.toString())
-                                Log.e("locationA",locationA.toString())
-                                Log.e("locationB",locationB.toString())
-                                if(distance < radius){
+                                Log.e("distance", distance.toString())
+                                Log.e("locationA", locationA.toString())
+                                Log.e("locationB", locationB.toString())
+                                if (distance < radius) {
                                     myMarkers.add(myMarker)
                                 }
-                            }else{
+                            } else {
                                 myMarkers.add(myMarker)
                             }
 
@@ -773,11 +835,17 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                (activity as NavigationHost).customToaster(
-                    title = getString(R.string.toast_error),
-                    message = getString(R.string.general_error),
-                    type = "connection"
-                );
+                Log.e("error", t!!.message.toString())
+                Log.e("msg", t!!.localizedMessage)
+                Log.e("msg2", t!!.cause.toString())
+                if (!t!!.localizedMessage.contains("End of input at line")) {
+                    (activity as NavigationHost).customToaster(
+                        title = getString(R.string.toast_error),
+                        message = getString(R.string.general_error),
+                        type = "connection"
+                    );
+                }
+
                 refresh_home!!.isRefreshing = false
             }
 
@@ -804,6 +872,26 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     Settings.Secure.LOCATION_MODE_OFF
                 )
                 mode != Settings.Secure.LOCATION_MODE_OFF
+            }
+        }
+    }
+
+    private val lightSensorListener: SensorEventListener = object : SensorEventListener {
+        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+            if (sensor.type == Sensor.TYPE_LIGHT) {
+                Log.e("LIGHT",sensor.toString())
+            }
+        }
+
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.sensor.type == Sensor.TYPE_LIGHT) {
+                Log.e("LIGHT",event!!.values[0].toString())
+
+                if(event!!.values[0] < 20000.0){
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_night));
+                }else{
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
+                }
             }
         }
     }

@@ -28,6 +28,7 @@
     <color name="cpb_soft_black">#333333</color>
     <color name="cpb_purple">#673AB7</color>
     <color name="cpb_pink">#E91E63</color>
+    <color name="cpb_soft_dark">#2e2e32</color>
 
     <color name="info">#c8448aff</color>
     <color name="success">#ff6d9b00</color>

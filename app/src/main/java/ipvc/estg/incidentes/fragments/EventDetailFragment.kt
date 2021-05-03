@@ -1,10 +1,11 @@
 package ipvc.estg.incidentes.fragments
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Geocoder
 import android.os.Bundle
+import android.os.Handler
 import android.util.Base64
 import android.util.Log
 import android.view.*
@@ -13,8 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
+import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
 import com.bumptech.glide.Glide
-import com.google.android.gms.common.util.Base64Utils.decode
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -22,10 +23,9 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.Event
-import ipvc.estg.incidentes.entities.MyMarker
-import ipvc.estg.incidentes.entities.User
 import ipvc.estg.incidentes.navigation.NavigationHost
 import ipvc.estg.incidentes.retrofit.EndPoints
 import ipvc.estg.incidentes.retrofit.ServiceBuilder
@@ -75,6 +75,7 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
     var idUser: Int? = null
     var type: Int = 0
     var staticSpinner: Spinner? = null
+    var btnSave: CircularProgressButton? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +116,7 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
 
         when (action) {
             "update" -> {
-              /*  (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.note_edit)*/
+                /*  (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.note_edit)*/
                 inputState(view, true);
                 view.save_event.visibility = View.VISIBLE
             }
@@ -144,67 +145,88 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         }
 
         view.save_event.setOnClickListener {
-
+            btnSave!!.startAnimation();
             val obj = JSONObject()
-            obj.put("id",id)
-            obj.put("user_id",idUser)
-            obj.put("type",staticSpinner!!.selectedItemPosition)
+            obj.put("id", id)
+            obj.put("user_id", idUser)
+            obj.put("type", staticSpinner!!.selectedItemPosition)
             obj.put("description", descriptionItem!!.text)
 
-            val payload = Base64.encodeToString(obj.toString().toByteArray(charset("UTF-8")), Base64.DEFAULT)
+            val payload = Base64.encodeToString(
+                obj.toString().toByteArray(charset("UTF-8")),
+                Base64.DEFAULT
+            )
             val token = (activity as NavigationHost).getAuthenticationToken()
 
             if(token == null){
                 (activity as NavigationHost).customToaster(
                     title = getString(R.string.toast_info),
                     message = getString(R.string.no_login),
-                    type= "info"
+                    type = "info"
                 );
-                (activity as NavigationHost).navigateTo(LoginFragment(), addToBackstack = true, animate = true)
+                (activity as NavigationHost).navigateTo(
+                    LoginFragment(),
+                    addToBackstack = true,
+                    animate = true
+                )
             }
 
 
             val request = ServiceBuilder.buildService(EndPoints::class.java)
-            val call = request.updateEvent(payload = payload,token!!)
+            val call = request.updateEvent(payload = payload, token!!)
 
             call.enqueue(object : Callback<Event> {
                 override fun onResponse(call: Call<Event>?, response: Response<Event>?) {
 
-                    if(response!!.isSuccessful && response.body().id != 0){
+                    if (response!!.isSuccessful && response.body().id != 0) {
                         val data = response!!.body();
-                        val event = Event(id=data.id,latitude = data.latitude,longitude = data.longitude,
-                            location = data.location,date = data.date,time = data.time,status = data.status,type = data.type,
-                            user_id = data.user_id,description = data.description,number = data.location,photo = data.photo,photo_finish = data.photo,latLng = LatLng(data.latitude,data.longitude))
+                        val event = Event(
+                            id = data.id,
+                            latitude = data.latitude,
+                            longitude = data.longitude,
+                            location = data.location,
+                            date = data.date,
+                            time = data.time,
+                            status = data.status,
+                            type = data.type,
+                            user_id = data.user_id,
+                            description = data.description,
+                            number = data.location,
+                            photo = data.photo,
+                            photo_finish = data.photo,
+                            latLng = LatLng(
+                                data.latitude,
+                                data.longitude
+                            )
+                        )
                         activity!!.invalidateOptionsMenu();
                         val bundle = Bundle()
                         bundle.putInt("id", event.id!!)
                         bundle.putDouble("latitude", event.latitude)
                         bundle.putDouble("longitude", event.longitude)
                         bundle.putString("date", event.date)
-                        bundle.putString("time",event.time)
+                        bundle.putString("time", event.time)
                         bundle.putInt("status", event.status)
                         bundle.putString("description", event.description)
                         bundle.putString("number", event.number)
                         bundle.putString("photo", event.photo)
                         bundle.putString("photo_finish", event.photo_finish)
                         bundle.putBoolean("owner", event.user_id == idUser)
-                        bundle.putString("action","view")
+                        bundle.putString("action", "view")
                         bundle.putInt("idUser", event.user_id!!)
-                        bundle.putInt("type",event.type)
+                        bundle.putInt("type", event.type)
 
-                        (activity as NavigationHost).customToaster(
-                            title = getString(R.string.toast_success),
-                            message = getString(R.string.event_updated),
-                            type= "success"
-                        );
+                        success(true,bundle)
 
-                        (activity as NavigationHost).navigateToWithData(EventDetailFragment(), addToBackstack = false, animate = true, "event_detail", bundle)
+
                     } else {
+
                         (activity as NavigationHost).customToaster(
                             title = getString(R.string.toast_error),
                             message = getString(R.string.general_error),
-                            type= "connection"
+                            type = "error"
                         );
+                        failed()
                     }
                 }
 
@@ -212,8 +234,9 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
                     (activity as NavigationHost).customToaster(
                         title = getString(R.string.toast_error),
                         message = getString(R.string.general_error),
-                        type= "connection"
+                        type = "connection"
                     );
+                    failed()
                 }
             })
         }
@@ -229,10 +252,17 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         dateItem = view.findViewById<TextView>(R.id.date)
 
         staticSpinner = view.findViewById(R.id.static_spinner) as Spinner
-        val staticAdapter = ArrayAdapter.createFromResource(context!!, R.array.type_array, android.R.layout.simple_spinner_item)
+        val staticAdapter = ArrayAdapter.createFromResource(
+            context!!,
+            R.array.type_array,
+            android.R.layout.simple_spinner_item
+        )
         staticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         staticSpinner!!.adapter = staticAdapter
         staticSpinner!!.setSelection(type)
+
+        btnSave = view.findViewById(R.id.save_event)
+        btnSave!!.setBackgroundResource(R.drawable.shapeleft);
     }
 
     fun setMiniMap() {
@@ -245,7 +275,7 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), 7f))
         mMap = googleMap
         mMap!!.isBuildingsEnabled = true
-        mMap!!.uiSettings.isMapToolbarEnabled = false
+        mMap!!.uiSettings.isMapToolbarEnabled = true
         makeMarker()
     }
 
@@ -289,22 +319,20 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun decodeBase64(input: String?): Bitmap? {
+        val decodedByte = Base64.decode(input, Base64.DEFAULT)
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = false
+        options.inPreferredConfig = Bitmap.Config.RGB_565
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.size, options)
+    }
+
     fun setItems(view: View) {
         if (photo != null && !photo!!.isEmpty()) {
             try{
-                val imageAsBytes: ByteArray = Base64.decode(photo,Base64.DEFAULT)
-                val imageFilePath = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.size)
-                Glide.with(this).load(imageFilePath).into(photoView!!)
-            }catch (e:java.lang.Exception){
-
-            }
-
-
-           /* Picasso.get()
-                .load(URL + photo) *//*  .centerCrop()*//*
-                .placeholder(R.drawable.progress_animation)
-                .resize(Resources.getSystem().displayMetrics.widthPixels, 0)
-                .into(photoView)*/
+                val bitmap = decodeBase64(photo)
+                photoView!!.setImageBitmap(bitmap)
+            }catch (e: java.lang.Exception){}
         } else {
             noImage!!.visibility = View.VISIBLE
         }
@@ -366,52 +394,97 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         menu.findItem(R.id.event_cancel).isVisible = (owner && status == 4)
     }
 
+    private fun failed(){
+        btnSave!!.isEnabled = true
+        btnSave!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.error))
+
+        Handler().postDelayed(Runnable
+        {
+            btnSave!!.revertAnimation();
+            btnSave!!.setBackgroundResource(R.drawable.shape);
+        }, 10 * 100)
+    }
+
+    private fun success(back:Boolean,bundle:Bundle){
+        btnSave!!.isEnabled = true
+        btnSave!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.done))
+        Handler().postDelayed(Runnable
+        {
+            btnSave!!.revertAnimation();
+            btnSave!!.setBackgroundResource(R.drawable.shape);
+            if(back){
+                (activity as NavigationHost).navigateToWithData(EventDetailFragment(), addToBackstack = false, animate = true, "event_detail", bundle)
+                (activity as NavigationHost).customToaster(title = getString(R.string.toast_success), message = getString(R.string.event_updated), type = "success");
+            }
+        }, 10 * 100)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.event_cancel -> {
-                val token = (activity as NavigationHost).getAuthenticationToken()
-                val request = ServiceBuilder.buildService(EndPoints::class.java)
-                val call = request.deleteEvent(id.toString(), idUser.toString(), token!!)
-                call.enqueue(object : Callback<Event> {
-                    override fun onResponse(call: Call<Event>?, response: Response<Event>?) {
-                        if(response!!.isSuccessful){
-                            activity?.onBackPressed();
-                            (activity as NavigationHost).customToaster(
-                                title = getString(R.string.toast_success),
-                                message = getString(R.string.event_deleted),
-                                type= "success"
-                            );
-                        }
+                MaterialAlertDialogBuilder(context!!, R.style.MaterialAlertDialog_rounded)
+                    .setTitle(getString(R.string.remove_event))
+                    .setMessage(getString(R.string.remove_event_body))
+                    .setPositiveButton(getString(R.string.yes_remove)) { dialog, which ->
+                        val token = (activity as NavigationHost).getAuthenticationToken()
+                        val request = ServiceBuilder.buildService(EndPoints::class.java)
+                        val call = request.deleteEvent(id.toString(), idUser.toString(), token!!)
+                        call.enqueue(object : Callback<Event> {
+                            override fun onResponse(call: Call<Event>?, response: Response<Event>?) {
+                                if (response!!.isSuccessful) {
+                                    (activity as NavigationHost).customToaster(
+                                        title = getString(R.string.toast_success),
+                                        message = getString(R.string.event_deleted),
+                                        type = "success"
+                                    );
+                                    activity?.onBackPressed();
+                                }else{
+                                    (activity as NavigationHost).customToaster(
+                                        title = getString(R.string.toast_error),
+                                        message = getString(R.string.general_error),
+                                        type = "error"
+                                    );
+                                }
+                            }
+
+                            override fun onFailure(call: Call<Event>?, t: Throwable?) {
+                                (activity as NavigationHost).customToaster(
+                                    title = getString(R.string.toast_error),
+                                    message = getString(R.string.general_error),
+                                    type = "connection"
+                                );
+                            }
+                        });
                     }
-                    override fun onFailure(call: Call<Event>?, t: Throwable?) {
-                        (activity as NavigationHost).customToaster(
-                            title = getString(R.string.toast_error),
-                            message = getString(R.string.general_error),
-                            type= "connection"
-                        );
-                    }
-                });
+                    .setNegativeButton(getString(R.string.no_remove)) { dialog, which -> }
+                    .show()
                 true
             }
             R.id.event_edit -> {
                 activity!!.invalidateOptionsMenu();
                 val bundle = Bundle()
                 bundle.putInt("id", id!!)
-               /* bundle.putCharSequence("position", position)*/
+                /* bundle.putCharSequence("position", position)*/
                 bundle.putDouble("latitude", latitude)
                 bundle.putDouble("longitude", longitude)
                 bundle.putString("date", date)
-                bundle.putString("time",time)
+                bundle.putString("time", time)
                 bundle.putInt("status", status)
                 bundle.putString("description", description)
                 bundle.putString("number", number)
                 bundle.putString("photo", photo)
                 bundle.putString("photo_finish", photo_finish)
                 bundle.putBoolean("owner", owner)
-                bundle.putString("action","update")
+                bundle.putString("action", "update")
                 bundle.putInt("idUser", idUser!!)
-                bundle.putInt("type",type)
-                (activity as NavigationHost).navigateToWithData(EventDetailFragment(), addToBackstack = false, animate = true, "event_detail", bundle)
+                bundle.putInt("type", type)
+                (activity as NavigationHost).navigateToWithData(
+                    EventDetailFragment(),
+                    addToBackstack = false,
+                    animate = true,
+                    "event_detail",
+                    bundle
+                )
                 true
             }
             R.id.event_edit_cancel -> {
@@ -421,17 +494,23 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
                 bundle.putDouble("latitude", latitude)
                 bundle.putDouble("longitude", longitude)
                 bundle.putString("date", date)
-                bundle.putString("time",time)
+                bundle.putString("time", time)
                 bundle.putInt("status", status)
                 bundle.putString("description", description)
                 bundle.putString("number", number)
                 bundle.putString("photo", photo)
                 bundle.putString("photo_finish", photo_finish)
                 bundle.putBoolean("owner", owner)
-                bundle.putString("action","view")
+                bundle.putString("action", "view")
                 bundle.putInt("idUser", idUser!!)
-                bundle.putInt("type",type)
-                (activity as NavigationHost).navigateToWithData(EventDetailFragment(), addToBackstack = false, animate = true, "event_detail", bundle)
+                bundle.putInt("type", type)
+                (activity as NavigationHost).navigateToWithData(
+                    EventDetailFragment(),
+                    addToBackstack = false,
+                    animate = true,
+                    "event_detail",
+                    bundle
+                )
                 true
             }
             else -> false

@@ -100,8 +100,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal">
 
+                <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:id="@+id/btn_login"
+                    android:text="@string/login_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:spinning_bar_width="4dp"
+                    app:spinning_bar_color="#FFF"
+                    app:spinning_bar_padding="6dp"
+                    android:textColor="@color/cpb_white"
+                    android:background="@drawable/shape" />
 
-                <com.github.florent37.shapeofview.shapes.CutCornerView
+
+             <!--   <com.github.florent37.shapeofview.shapes.CutCornerView
 
                     android:clickable="true"
                     android:focusable="true"
@@ -132,14 +145,6 @@
                             android:orientation="horizontal"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent">
-
-                            <!--<ImageView
-                                android:id="@+id/loginImage"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:layout_marginRight="5dp"
-                                android:src="@drawable/ic_login" />-->
 
                             <TextView
                                 app:layout_constraintStart_toEndOf="@+id/loginImage"
@@ -179,7 +184,7 @@
                             android:indeterminate="true"/>
 
                     </FrameLayout>
-                </com.github.florent37.shapeofview.shapes.CutCornerView>
+                </com.github.florent37.shapeofview.shapes.CutCornerView>-->
 
             </RelativeLayout>
 
