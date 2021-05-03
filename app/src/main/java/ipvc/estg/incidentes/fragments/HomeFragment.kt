@@ -878,14 +878,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val lightSensorListener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-            if (sensor.type == Sensor.TYPE_LIGHT) {
-                Log.e("LIGHT",sensor.toString())
-            }
+            if (sensor.type == Sensor.TYPE_LIGHT) { }
         }
 
         override fun onSensorChanged(event: SensorEvent) {
             if (event.sensor.type == Sensor.TYPE_LIGHT) {
-                Log.e("LIGHT",event!!.values[0].toString())
 
                 if(event!!.values[0] < 20000.0){
                     mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_night));
