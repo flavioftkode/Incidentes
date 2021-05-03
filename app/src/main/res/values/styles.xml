@@ -1,5 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
+    <style name="MaterialAlertDialog_rounded" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="shapeAppearanceOverlay">@style/DialogCorners</item>
+        <item name="android:background">@color/cpb_soft_dark</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text.Light</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.App.Body.Text.Light</item>
+    </style>
+
+    <style name="DialogCorners">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+
     <!-- Base application theme. -->
     <style name="Theme.Shrine" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -8,7 +21,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+      <!--  <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>-->
     </style>
 
     <style name="Widget.Shrine.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -109,9 +122,9 @@
         <item name="cornerSize">10dp</item>
     </style>
 
-    <style name="MaterialAlertDialog.App" parent="MaterialAlertDialog.MaterialComponents">
+    <!--<style name="MaterialAlertDialog.App" parent="MaterialAlertDialog.MaterialComponents">
         <item name="shapeAppearance">@style/ShapeAppearance.App.MediumComponent</item>
-    </style>
+    </style>-->
 
     <style name="ThemeOverlay.App.Button" parent="">
         <item name="colorPrimary">@color/cpb_white</item>
@@ -137,7 +150,7 @@
         <item name="colorSecondary">@color/cpb_white</item>
         <item name="colorSurface">@color/cpb_white</item>
         <item name="colorOnSurface">@color/cpb_black</item>
-        <item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>
+        <!--<item name="alertDialogStyle">@style/MaterialAlertDialog.App</item>-->
         <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button</item>
         <item name="buttonBarNeutralButtonStyle">@style/Widget.App.Button</item>
@@ -146,6 +159,14 @@
 
     <style name="MaterialAlertDialog.App.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
         <item name="android:textColor">@color/cpb_black</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Title.Text.Light" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textColor">@color/cpb_white</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Body.Text.Light" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/cpb_white</item>
     </style>
 
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button.TextButton.Dialog">

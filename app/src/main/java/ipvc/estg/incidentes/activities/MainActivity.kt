@@ -170,24 +170,19 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
         return false
     }
 
-    override fun logout(fragment: Fragment) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("logout"/*getString(R.string.logout)*/)
-            .setMessage("Sair"/*getString(R.string.leave)*/)
-            .setPositiveButton("Sim"/*getString(R.string.yes)*/) { dialog, which ->
+    override fun logout(fragment: Fragment,tag: String) {
+        MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog_rounded)
+            .setTitle(getString(R.string.logout))
+            .setMessage(getString(R.string.leave))
+            .setPositiveButton(getString(R.string.yes)) { dialog, which ->
                 val settings = getSharedPreferences("REMEMBER", Context.MODE_PRIVATE)
                 settings.edit().clear().apply()
 
                 val auth = getSharedPreferences("AUTHENTICATION", Context.MODE_PRIVATE)
                 auth.edit().clear().apply()
-               /* supportFragmentManager
-                    .beginTransaction()
-                    .detach(NotesFragment())
-                    .add(R.id.container, NotesFragment())
-                    .commit()*/
-                navigateTo(fragment, addToBackstack = false, animate = true)
+                navigateTo(fragment, addToBackstack = false, animate = true,tag = tag)
             }
-            .setNegativeButton("Não"/*getString(R.string.no)*/) { dialog, which -> }
+            .setNegativeButton(getString(R.string.no)) { dialog, which -> }
             .show()
     }
 
@@ -279,24 +274,6 @@ class MainActivity : AppCompatActivity(), NavigationHost, DatePickerDialog.OnDat
     }
 
     override fun customToaster(message: String,title: String,type: String){
-        /*val inflater = layoutInflater
-        val layout: View = inflater.inflate(
-            R.layout.custom_toast,
-            findViewById<LinearLayout>(R.id.custom_toast_container)
-        )
-        val text = layout.findViewById<View>(R.id.text) as TextView
-        text.text = message
-        val resources: Resources = applicationContext.resources
-        val resourceId: Int = resources.getIdentifier(
-            drawable,
-            "drawable",
-            applicationContext.packageName
-        )
-        text.setCompoundDrawablesWithIntrinsicBounds(resourceId, 0, 0, 0);
-        val toast = Toast(applicationContext)
-        toast.duration = duration
-        toast.view = layout
-        toast.show()*/
         var toastType =  MotionToast.TOAST_SUCCESS;
         if(type == "success"){
             toastType = MotionToast.TOAST_SUCCESS;

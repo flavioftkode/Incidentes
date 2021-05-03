@@ -110,7 +110,20 @@
 
         </RelativeLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <!--<br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/btn_login"
+            android:text="@string/login_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:spinning_bar_width="4dp"
+            app:spinning_bar_color="#FFF"
+            app:spinning_bar_padding="6dp"
+            android:textColor="@color/cpb_white"
+            android:background="@drawable/shape" />-->
+
+       <!-- <com.google.android.material.button.MaterialButton
             android:id="@+id/call_trash"
             style="@style/ButtonCornerLeftTop"
             android:layout_width="wrap_content"
@@ -124,7 +137,7 @@
             android:text="@string/report_incident"
             android:textColor="@color/cpb_white"
             app:iconSize="30dp"
-            app:strokeColor="@color/colorPrimaryDark" />
+            app:strokeColor="@color/colorPrimaryDark" />-->
 
         <!--<com.google.android.material.button.MaterialButton
             android:insetTop="0dp"
@@ -143,10 +156,8 @@
             app:strokeColor="@color/colorPrimary" />-->
 
         <FrameLayout
-            android:background="@color/cpb_white"
-            android:backgroundTint="@color/cpb_white"
             android:elevation="9dp"
-            android:visibility="gone"
+            android:visibility="visible"
             android:id="@+id/map_loading"
             android:layout_marginTop="55dp"
             android:layout_width="match_parent"
@@ -155,7 +166,7 @@
             android:clipToPadding="false"
             tools:context=".ProductGridFragment">
 
-            <ProgressBar
+           <!-- <ProgressBar
                 android:background="@color/cpb_white"
                 android:backgroundTint="@color/cpb_white"
                 android:id="@+id/progress_bar"
@@ -164,7 +175,26 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:indeterminate="true"
-                android:visibility="visible" />
+                android:visibility="visible" />-->
+
+            <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+                android:id="@+id/call_trash"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_gravity="end|bottom"
+                android:backgroundTint="@color/colorPrimary"
+                app:spinning_bar_width="4dp"
+                app:spinning_bar_color="#FFF"
+                app:spinning_bar_padding="6dp"
+                android:elevation="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingLeft="25dp"
+                android:text="@string/report_incident"
+                android:textColor="@color/cpb_white"
+                app:iconSize="30dp"
+                android:background="@drawable/shapeleft"
+                app:strokeColor="@color/colorPrimaryDark"/>
 
         </FrameLayout>
 

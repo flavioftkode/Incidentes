@@ -23,7 +23,7 @@ interface NavigationHost {
 
     fun navigateToShared(fragment: Fragment, addToBackstack: Boolean, animate: Boolean, view: View?)
 
-    fun logout(fragment: Fragment)
+    fun logout(fragment: Fragment,tag: String)
 
     fun getRememberMe(): String?
 

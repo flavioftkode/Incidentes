@@ -76,6 +76,18 @@
                 android:layout_marginBottom="24dp"
                 android:visibility="visible" />
 
+            <TextView
+                android:textSize="12sp"
+                android:textColor="@color/cpb_red"
+                android:layout_below="@+id/image_camera"
+                android:id="@+id/required"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/field_required"
+                android:gravity="center"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone" />
+
             <com.kusu.loadingbutton.LoadingButton
                 android:layout_below="@+id/image_camera"
                 android:id="@+id/add_image"
@@ -84,7 +96,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="24dp"
                 android:padding="12dp"
-                android:text="@string/event_add_image"
+
                 android:textColor="@color/Black"
                 android:textAllCaps="false"
                 android:visibility="visible"
@@ -168,7 +180,7 @@
 
 
 
-            <com.kusu.loadingbutton.LoadingButton
+           <!-- <com.kusu.loadingbutton.LoadingButton
                 android:layout_below="@+id/description_label"
                 android:id="@+id/bnt_send"
                 android:layout_width="match_parent"
@@ -185,7 +197,101 @@
                 app:lb_isCircular="false"
                 app:lb_cornerRadius="5dp"
                 app:lb_shadowHeight="0dp"
-                android:textSize="16sp"/>
+                android:textSize="16sp"/>-->
+
+         <!--   <com.github.florent37.shapeofview.shapes.CutCornerView
+                android:layout_below="@+id/description_label"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="3dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:textAlignment="center"
+                app:shape_cutCorner_bottomLeftSize="12dp"
+                app:shape_cutCorner_bottomRightSize="12dp"
+                app:shape_cutCorner_topLeftSize="12dp"
+                app:shape_cutCorner_topRightSize="12dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:visibility="visible"
+                    android:id="@+id/bnt_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:textAlignment="center"
+                    android:background="@color/colorPrimary"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:background="@color/transparent"
+                        android:backgroundTint="@color/transparent"
+                        android:gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/event_send_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="@string/event_create"
+                            android:textAlignment="center"
+                            android:textColor="@color/white"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+                <FrameLayout
+                    android:background="@color/colorPrimary"
+                    android:elevation="2dp"
+                    android:visibility="gone"
+                    android:id="@+id/progress_bar_frame"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <ProgressBar
+                        android:background="@color/transparent"
+                        android:backgroundTint="@color/transparent"
+                        android:id="@+id/progress_bar"
+                        style="@style/Base.Widget.AppCompat.ProgressBar"
+                        android:indeterminateTint="@android:color/white"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"/>
+
+                </FrameLayout>
+            </com.github.florent37.shapeofview.shapes.CutCornerView>-->
+
+            <RelativeLayout
+                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_below="@+id/description_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+                    android:gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:id="@+id/bnt_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:spinning_bar_width="4dp"
+                    app:spinning_bar_color="#FFF"
+                    app:spinning_bar_padding="6dp"
+                    android:textColor="@color/cpb_white"
+                    android:text="@string/event_create"
+                    android:background="@drawable/shape" />
+            </RelativeLayout>
+
 
         </RelativeLayout>
         </androidx.core.widget.NestedScrollView>
