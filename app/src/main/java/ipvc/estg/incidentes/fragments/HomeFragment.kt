@@ -3,6 +3,7 @@ package ipvc.estg.incidentes.fragments
 import android.Manifest
 import android.R.attr.*
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
@@ -20,6 +21,7 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
@@ -31,8 +33,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.GeofencingRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.OnCameraIdleListener
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.*
@@ -60,6 +67,7 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.Result.Companion.failure
 import kotlin.system.exitProcess
 
 
@@ -83,6 +91,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var dragLon = 0.0
     private var logged: Boolean? = false
     private var clusterManagerAlgorithm: Algorithm<MyMarker>? = null
+    var myRadius : Circle? = null
 
     private val delta = 0.1f
     private val points: List<LatLng> = listOf<LatLng>(
@@ -196,19 +205,37 @@ class HomeFragment : Fragment(), View.OnClickListener {
     var finished = false
     var progress = false
     private lateinit var sensorManager: SensorManager
+    lateinit var geofencingClient: GeofencingClient
+    var geofenceList = arrayListOf<Geofence>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /*SET OPTIONS MENU*/
         setHasOptionsMenu(true)
+        /*PREPER SENSORMANAGER*/
         sensorManager = activity!!.getSystemService(SENSOR_SERVICE) as SensorManager
-        val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        if (lightSensor != null) {
-            sensorManager.registerListener(
-                lightSensorListener,
-                lightSensor,
-                SensorManager.SENSOR_DELAY_NORMAL
+        geofencingClient = LocationServices.getGeofencingClient(activity)
+
+        geofenceList.add(Geofence.Builder()
+            .setRequestId("1")
+            .setCircularRegion(
+                38.7071159,
+                -9.1639664,
+                4000f
             )
-        }
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+            .setExpirationDuration(1000000)
+            .build())
+
+    }
+
+    private fun buildGeofencingRequest(geofence: Geofence): GeofencingRequest {
+        return GeofencingRequest.Builder().setInitialTrigger(0).addGeofences(listOf(geofence)).build()
+    }
+
+    private val geofencePendingIntent: PendingIntent by lazy {
+        val intent = Intent(context, HomeFragment::class.java)
+        PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -220,6 +247,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.event_filter -> {
+                /*OPEN BOTTOM SHEET FRAGMENT*/
                 (activity as NavigationHost).showFilters();
                 true
             }
@@ -232,13 +260,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-
+        /*GET AUTH BEARER TOKEN AND LOGGED USER*/
         _token = authenticationToken
         _userId = authenticationUserId
         val view = inflater.inflate(R.layout.in_home_fragment, container, false)
-
-
         logged = (activity as NavigationHost).isUserLogged()
 
         if(logged!!){
@@ -246,15 +271,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }else{
             view.in_auth.text = getString(R.string.navigation_login)
         }
-
         // Set up the tool bar
         setToolbar(view)
+        /*PROMPT USER TO GPS*/
         if (!isLocationEnabled(context)) {
             promptTurnGPS()
         }
         requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
         declareItems(view)
         setClickListeners(view)
+        /*DECLARE MAP*/
         mMapView = view!!.findViewById<View>(R.id.map) as MapView
         mMapView!!.onCreate(savedInstanceState)
         mMapView!!.onResume() // needed to get the map to display immediately
@@ -262,18 +288,15 @@ class HomeFragment : Fragment(), View.OnClickListener {
         try {
             val zoomIn: View = mMapView!!.findViewWithTag("GoogleMapZoomInButton")
             val zoomInOut = zoomIn.parent as View
-
             if (zoomInOut != null) {
                 moveView(zoomInOut, left, top, right, bottom, false, false)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-
         return view
     }
-
+    /*NAVIGATION MENU*/
     private fun setToolbar(view: View?){
         (activity as AppCompatActivity).setSupportActionBar(view!!.app_bar)
         (activity as AppCompatActivity?)!!.supportActionBar!!.title = getString(R.string.home)
@@ -288,7 +311,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
             )
         ) // Menu close icon
     }
-
+    /*MOVE MAP VIEW*/
     private fun moveView(
         view: View?,
         left: Int,
@@ -332,7 +355,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
             ex.printStackTrace()
         }
     }
-
+    /*PERMISSIONS RESULT*/
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -354,13 +377,19 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
-        Log.e("resume", "resume")
+        /*LIGHTSENSOR*/
+        val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        /*REGISTER LIGHTSENSOR LISTENER*/
+        sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        Log.e("lightSensorListener", "lightSensorListener")
         activity!!.invalidateOptionsMenu();
+        /*START GETTING LOCATION UPDATES*/
         if(gps != null){
             gps!!.startUsingGPS();
         }
 
         if(!(activity as NavigationHost).getConsentStatus()!! && (_token != null && _token != null && _userId != 0)){
+            /*ASK FOR CONSENT*/
             (activity as NavigationHost).navigateTo(
                 ConsentFragment(),
                 addToBackstack = false,
@@ -368,11 +397,9 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 tag = "consent"
             )
         }
-        /*map_loading.visibility = View.VISIBLE;*/
-        //activity!!.registerReceiver(mNotificationReceiver, IntentFilter("FILTER"))
         if (mMap != null) {
-            //mMap!!.clear()
             myMarkers.clear()
+            /*GET ALL MARKERS IF MAP WAS PREVIOUSLY INITIALIZED*/
             getMarkers()
         }
     }
@@ -380,6 +407,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onPause() {
         super.onPause()
         //activity!!.unregisterReceiver(mNotificationReceiver)
+        sensorManager.unregisterListener(lightSensorListener)
         if(gps != null){
             gps!!.stopUsingGPS();
         }
@@ -468,8 +496,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
             )
         )
 
-        Handler().postDelayed(
-            Runnable
+        Handler(Looper.getMainLooper()).postDelayed(
             {
                 btnTrash!!.revertAnimation();
                 btnTrash!!.setBackgroundResource(R.drawable.shapeleft);
@@ -486,8 +513,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
             )
         )
 
-        Handler().postDelayed(
-            Runnable
+        Handler(Looper.getMainLooper()).postDelayed(
             {
                 btnTrash!!.revertAnimation();
                 btnTrash!!.setBackgroundResource(R.drawable.shapeleft);
@@ -622,11 +648,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     clusterManager!!.algorithm = clusterManagerAlgorithm as Algorithm<MyMarker?>
                     clusterManager!!.clearItems()
                     options = PolygonOptions()
-                    options!!.addAll(points).fillColor(Color.argb(100, 60, 63, 65))
-                        .strokeWidth((0).toFloat())
-                        .strokeColor(
-                            Color.TRANSPARENT
-                        )
+                    options!!.addAll(points).fillColor(Color.argb(100, 60, 63, 65)).strokeWidth((0).toFloat()).strokeColor(Color.TRANSPARENT)
                     options!!.addHole(hole)
                     val poly = PolygonOptions()
                     poly.addAll(hole).strokeWidth((5).toFloat()).strokeColor(R.color.white)
@@ -649,7 +671,12 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     googleMap.uiSettings.isMapToolbarEnabled = false
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(portugal, 14.3f))
                     mMap = googleMap
-                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
+                    mMap!!.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.map_in_day
+                        )
+                    );
                     setUpClusterManager()
                     mMap!!.setOnMapClickListener { point ->
                         if (PolyUtil.containsLocation(point, hole, true)) {
@@ -720,6 +747,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             }
                         }
                     })
+                    /*mMap!!.setOnCameraChangeListener { camera ->
+                        Log.e("zoom", camera.zoom.toString())
+                    }*/
+
+                    mMap!!.setOnCameraMoveStartedListener {
+                        val preferences: SharedPreferences = context!!.getSharedPreferences("MAPZOOM", Context.MODE_PRIVATE)
+                        val editor = preferences.edit()
+                        editor.putFloat("zoom", mMap!!.cameraPosition.zoom)
+                        editor.apply()
+                    }
 
                     /*map_loading.visibility = View.GONE;*/
                 }
@@ -735,26 +772,44 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
+    private fun getGeofencingRequest(): GeofencingRequest {
+        return GeofencingRequest.Builder().apply {
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geofenceList)
+        }.build()
+    }
+
+
     /*GET ALL MARKERS*/
     fun getMarkers(){
-
         val preferences: SharedPreferences = context!!.getSharedPreferences(
             "FILTERMAP",
             Context.MODE_PRIVATE
         )
-        var radius = preferences.getInt("radius", 0)
+        val radius = preferences.getInt("radius", 0)
         val obj = JSONObject()
         obj.put("0", preferences.getBoolean("0", true));
         obj.put("1", preferences.getBoolean("1", true));
         obj.put("2", preferences.getBoolean("2", true));
         obj.put("3", preferences.getBoolean("3", true));
         obj.put("4", preferences.getBoolean("4", true));
-
-        var payload = Base64.encodeToString(
+        val payload = Base64.encodeToString(
             obj.toString().toByteArray(charset("UTF-8")),
             Base64.DEFAULT
         )
-        Log.e("payload", payload)
+
+        if(mMarker != null){
+            mMarker!!.remove()
+            mMarker = mMap!!.addMarker(
+                MarkerOptions()
+                    .position(LatLng(mMarker!!.position.latitude, mMarker!!.position.longitude))
+                    .draggable(true)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
+            )
+        }
+
+        geofencingClient.addGeofences(buildGeofencingRequest(geofenceList[0]), geofencePendingIntent)
+
         val request = ServiceBuilder.buildService(EndPoints::class.java)
         val call = request.getCluster(payload)
 
@@ -764,10 +819,23 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 response: Response<List<MyMarker>>?
             ) {
                 myMarkers.clear()
+                if (myRadius != null) {
+                    myRadius!!.remove()
+                }
                 Log.e("----", "----")
                 Log.e("response", response!!.body().toString())
-                if (response!!.isSuccessful) {
+                if (response.isSuccessful) {
                     try {
+                        if (radius != 0) {
+                            myRadius = mMap!!.addCircle(
+                                CircleOptions()
+                                    .center(LatLng(gps!!.getLatitude(), gps!!.getLongitude()))
+                                    .radius(radius.toDouble())
+                                    .strokeColor(R.color.cpb_light_purple)
+                                    .fillColor(Color.TRANSPARENT)
+                            )
+                        }
+
                         response.body().forEach {
 
                             val myMarker = MyMarker(
@@ -835,9 +903,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
             }
 
             override fun onFailure(call: Call<List<MyMarker>>?, t: Throwable?) {
-                Log.e("error", t!!.message.toString())
-                Log.e("msg", t!!.localizedMessage)
-                Log.e("msg2", t!!.cause.toString())
                 if (!t!!.localizedMessage.contains("End of input at line")) {
                     (activity as NavigationHost).customToaster(
                         title = getString(R.string.toast_error),
@@ -878,16 +943,29 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val lightSensorListener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-            if (sensor.type == Sensor.TYPE_LIGHT) { }
+            Log.e("onAccuracyChanged", "onAccuracyChanged")
+            if (sensor.type == Sensor.TYPE_LIGHT) {
+
+            }
         }
 
         override fun onSensorChanged(event: SensorEvent) {
+            Log.e("onSensorChanged", "onSensorChanged")
             if (event.sensor.type == Sensor.TYPE_LIGHT) {
-
                 if(event!!.values[0] < 20000.0){
-                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_night));
+                    mMap!!.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.map_in_night
+                        )
+                    );
                 }else{
-                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
+                    mMap!!.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.map_in_day
+                        )
+                    );
                 }
             }
         }

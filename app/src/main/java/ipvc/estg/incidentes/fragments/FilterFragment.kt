@@ -121,20 +121,24 @@ class FilterFragment : BottomSheetDialogFragment() {
         })
 
         filterClose.setOnClickListener {
-
-            val preferences: SharedPreferences = context!!.getSharedPreferences("FILTERMAP", Context.MODE_PRIVATE)
-            val editor = preferences.edit()
-            editor.putInt("radius", (view.radius).text.toString().toInt())
-            editor.apply()
-
-            val fragment: HomeFragment = activity!!.supportFragmentManager.findFragmentByTag("home") as HomeFragment
-            fragment.getMarkers()
             dismiss()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        var myRadius = 0;
+        if((radius).text.isNotEmpty()){
+            myRadius = (radius).text.toString().toInt()
+        }
+
+        val preferences: SharedPreferences = context!!.getSharedPreferences("FILTERMAP", Context.MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putInt("radius", myRadius)
+        editor.apply()
+
+        val fragment: HomeFragment = activity!!.supportFragmentManager.findFragmentByTag("home") as HomeFragment
+        fragment.getMarkers()
     }
 
     fun filter(): FilterFragment {
