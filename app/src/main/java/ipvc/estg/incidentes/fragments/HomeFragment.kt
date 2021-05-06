@@ -407,6 +407,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
     override fun onPause() {
         super.onPause()
         //activity!!.unregisterReceiver(mNotificationReceiver)
+        /*UNREGISTER LIGHSENSOR LISTENER*/
         sensorManager.unregisterListener(lightSensorListener)
         if(gps != null){
             gps!!.stopUsingGPS();
