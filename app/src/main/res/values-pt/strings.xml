@@ -125,6 +125,12 @@
     <string name="consent_btn">Continuar</string>
     <string name="to_fast">Está se a mover rapido de mais, abrande</string>
 
+    <!--Strings dialog gps-->
+    <string name="gps_dialog_title">GPS desativado</string>
+    <string name="gps_dialog_body">GPS encontra-se desativado. Deseja ir para o menu de definições?</string>
+    <string name="gps_dialog_setting">Definições</string>
+    <string name="gps_dialog_cancel">Cancelar</string>
+
     <string-array name="type_array">
         <item>Danos na via</item>
         <item>Lixo na via</item>

@@ -126,6 +126,12 @@
     <string name="consent_btn">Continue</string>
     <string name="to_fast">You are moving to fast, slow down</string>
 
+    <!--Strings dialog gps-->
+    <string name="gps_dialog_title">GPS turned off</string>
+    <string name="gps_dialog_body">GPS is turned off. Do you wish to go to the definitions menu?</string>
+    <string name="gps_dialog_setting">Definitions</string>
+    <string name="gps_dialog_cancel">Cancel</string>
+
     <string-array name="type_array">
         <item>Damage on road</item>
         <item>Garbage on road</item>
