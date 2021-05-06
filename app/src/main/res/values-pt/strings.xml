@@ -123,6 +123,7 @@
     <string name="yes_remove">Confirmar</string>
     <string name="no_remove">Cancelar</string>
     <string name="consent_btn">Continuar</string>
+    <string name="to_fast">Está se a mover rapido de mais, abrande</string>
 
     <string-array name="type_array">
         <item>Danos na via</item>

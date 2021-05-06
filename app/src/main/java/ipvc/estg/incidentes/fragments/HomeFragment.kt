@@ -68,6 +68,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlin.Result.Companion.failure
+import kotlin.math.abs
 import kotlin.system.exitProcess
 
 
@@ -379,8 +380,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
         super.onResume()
         /*LIGHTSENSOR*/
         val lightSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        val linearSensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER )
         /*REGISTER LIGHTSENSOR LISTENER*/
-        sensorManager.registerListener(lightSensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(sensorListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(sensorListener, linearSensor, SensorManager.SENSOR_DELAY_NORMAL)
         Log.e("lightSensorListener", "lightSensorListener")
         activity!!.invalidateOptionsMenu();
         /*START GETTING LOCATION UPDATES*/
@@ -408,7 +411,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
         super.onPause()
         //activity!!.unregisterReceiver(mNotificationReceiver)
         /*UNREGISTER LIGHSENSOR LISTENER*/
-        sensorManager.unregisterListener(lightSensorListener)
+        sensorManager.unregisterListener(sensorListener)
         if(gps != null){
             gps!!.stopUsingGPS();
         }
@@ -945,11 +948,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private val lightSensorListener: SensorEventListener = object : SensorEventListener {
+    private val sensorListener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
             Log.e("onAccuracyChanged", "onAccuracyChanged")
-            if (sensor.type == Sensor.TYPE_LIGHT) {
-
+            if (sensor.type == Sensor.TYPE_ACCELEROMETER ) {
+                Log.e("TYPE_LINEAR","TYPE_LINEAR")
             }
         }
 
@@ -971,6 +974,18 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         )
                     );
                 }
+            }else if (event.sensor.type == Sensor.TYPE_ACCELEROMETER ) {
+                Log.e("speed",((event!!.values[0] * 3.6)).toString())
+
+                if((abs(event!!.values[0]) * 3.6) > 10){
+                    (activity as NavigationHost).customToaster(
+                        title = getString(R.string.toast_warning),
+                        message = getString(R.string.to_fast),
+                        type = "warning"
+                    );
+                }
+
+
             }
         }
     }
