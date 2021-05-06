@@ -124,6 +124,7 @@
     <string name="yes_remove">Confirm</string>
     <string name="no_remove">Cancel</string>
     <string name="consent_btn">Continue</string>
+    <string name="to_fast">You are moving to fast, slow down</string>
 
     <!--Strings dialog gps-->
     <string name="gps_dialog_title">GPS turned off</string>
