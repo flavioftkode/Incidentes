@@ -69,9 +69,13 @@
     <string name="create_event">Registar incidente</string>
     <string name="no_login">É necessário login para realizar esta ação</string>
     <string name="consent_title">Consentimento</string>
-    <string name="consent_body">Mensagem</string>
-    <string name="consent_checkbox_1">Concordo 1</string>
-    <string name="consent_checkbox_2">Concordo 2</string>
+    <string name="consent_body">Os visitantes podem postar conteúdo, desde que não seja obsceno, ilegal, difamatório, ameaçador, infrator de direitos de propriedade intelectual, invasor de privacidade ou prejudicial de qualquer outra forma a terceiros. O conteúdo deve estar livre de vírus de software, campanha política e solicitação comercial. Nós nos reservamos todos os direitos (mas não a obrigação) de remover e / ou editar tal conteúdo. Ao postar seu conteúdo, você concede a [nome] o direito não exclusivo, livre de royalties e irrevogável de usar, reproduzir, publicar, modificar tal conteúdo em todo o mundo em qualquer mídia.
+     \ n \ n
+     Se você é proprietário de uma conta nesta APP, é o único responsável por manter a confidencialidade de seus dados privados de usuário (nome de usuário e senha). Você é responsável por todas as atividades que ocorram com sua conta ou senha.
+
+     Nós nos reservamos todos os direitos de encerrar contas, editar ou remover conteúdo e cancelar incidentes a seu exclusivo critério. </string>
+    <string name="consent_checkbox_1">Li e aceito os termos de utilização.</string>
+    <string name="consent_checkbox_2">Aceito que as minhas imagens sejam utilizadas para fins de resolução de incidentes.</string>
     <string name="consent_needed">É necessario o seu consentimento para continuar</string>
 
     <!--Event detail fragment-->
@@ -118,6 +122,7 @@
     <string name="remove_event_body">Deseja cancelar o incidente selecionado?</string>
     <string name="yes_remove">Confirmar</string>
     <string name="no_remove">Cancelar</string>
+    <string name="consent_btn">Continuar</string>
 
     <string-array name="type_array">
         <item>Danos na via</item>

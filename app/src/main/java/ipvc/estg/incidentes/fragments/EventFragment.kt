@@ -6,10 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Geocoder
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
-import android.os.Handler
+import android.os.*
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
@@ -17,16 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.Spinner
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
-import com.bumptech.glide.Glide
-import com.facebook.FacebookSdk.getApplicationContext
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -99,7 +91,6 @@ class EventFragment : Fragment() {
 
     fun setMiniMap() {
         val mapFragment = childFragmentManager!!.findFragmentById(R.id.map_lite) as SupportMapFragment?
-        //val mapFragment = parentFragmentManager.findFragmentById(R.id.map_lite) as SupportMapFragment
         Objects.requireNonNull(mapFragment!!.view)!!.isClickable = false
         mapFragment.getMapAsync(OnMapReadyCallback {
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), 14.3f))
@@ -115,11 +106,7 @@ class EventFragment : Fragment() {
 
     fun declareItems(view: View) {
         staticSpinner = view.findViewById(R.id.static_spinner) as Spinner
-        val staticAdapter = ArrayAdapter.createFromResource(
-            context!!,
-            R.array.type_array,
-            android.R.layout.simple_spinner_item
-        )
+        val staticAdapter = ArrayAdapter.createFromResource(context!!, R.array.type_array, android.R.layout.simple_spinner_item)
         staticAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         staticSpinner!!.adapter = staticAdapter
         staticSpinner!!.setSelection(0)
@@ -205,8 +192,7 @@ class EventFragment : Fragment() {
             )
         )
 
-        Handler().postDelayed(Runnable
-        {
+        Handler(Looper.getMainLooper()).postDelayed({
             bnt_send!!.revertAnimation();
             bnt_send!!.setBackgroundResource(R.drawable.shape);
         }, 10 * 100)
@@ -221,8 +207,7 @@ class EventFragment : Fragment() {
             )
         )
 
-        Handler().postDelayed(Runnable
-        {
+        Handler(Looper.getMainLooper()).postDelayed({
             bnt_send!!.revertAnimation();
             bnt_send!!.setBackgroundResource(R.drawable.shape);
             (activity as NavigationHost).customToaster(title = getString(R.string.toast_success), message = getString(R.string.event_created), type = "success");

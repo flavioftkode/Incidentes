@@ -2,9 +2,10 @@ package ipvc.estg.incidentes.services
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.BitmapFactory
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Base64
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,9 +27,8 @@ import com.google.maps.android.ui.IconGenerator
 import ipvc.estg.incidentes.R
 import ipvc.estg.incidentes.entities.MyMarker
 import ipvc.estg.incidentes.fragments.EventDetailFragment
-import ipvc.estg.incidentes.fragments.NotesFragment
+import ipvc.estg.incidentes.fragments.HomeFragment
 import ipvc.estg.incidentes.navigation.NavigationHost
-import java.lang.Exception
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
@@ -38,8 +38,7 @@ class MarkerClusterRenderer(
     private val mycontext: Context,
     map: GoogleMap,
     clusterManager: ClusterManager<MyMarker?>
-) :
-    DefaultClusterRenderer<MyMarker>(mycontext, map, clusterManager), OnInfoWindowClickListener {
+) : DefaultClusterRenderer<MyMarker>(mycontext, map, clusterManager), OnInfoWindowClickListener {
     private val googleMap: GoogleMap
     private val layoutInflater: LayoutInflater
     private val iconGenerator: IconGenerator = IconGenerator(mycontext)
@@ -66,7 +65,6 @@ class MarkerClusterRenderer(
         marker.tag = clusterItem
     }
 
-
     override fun onInfoWindowClick(marker: Marker) {
         val myMarker = marker.tag as MyMarker?
         val bundle = Bundle()
@@ -84,14 +82,25 @@ class MarkerClusterRenderer(
         bundle.putString("photo_finish", myMarker.photo_finish)
         bundle.putBoolean("owner", myMarker.user_id == idUser)
         bundle.putInt("idUser", idUser)
-        bundle.putString("action","view")
-        bundle.putInt("type",myMarker.type)
+        bundle.putString("action", "view")
+        bundle.putInt("type", myMarker.type)
 
-        (mycontext as NavigationHost).navigateToWithData(EventDetailFragment(), addToBackstack = true, animate = true, data = bundle,tag = "event_detail")
+        (mycontext as NavigationHost).navigateToWithData(
+            EventDetailFragment(),
+            addToBackstack = true,
+            animate = true,
+            data = bundle,
+            tag = "event_detail"
+        )
     }
 
-    override fun shouldRenderAsCluster(cluster: Cluster<MyMarker>?): Boolean {
 
+    override fun shouldRenderAsCluster(cluster: Cluster<MyMarker>?): Boolean {
+        val preferences: SharedPreferences = mycontext.getSharedPreferences("MAPZOOM", Context.MODE_PRIVATE)
+        val zoom = preferences.getFloat("zoom", 0.0f)
+        if(zoom >= 19.5f && zoom != 0.0f){
+            return false
+        }
         return cluster!!.size > 1
     }
 
@@ -103,19 +112,39 @@ class MarkerClusterRenderer(
             val myMarker = marker.tag as MyMarker? ?: return clusterItemView
             val status = clusterItemView.findViewById<TextView>(R.id.status)
             if (myMarker.status.id == 1) {
-                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(ContextCompat.getColor(mycontext, R.color.success))
+                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(
+                    ContextCompat.getColor(
+                        mycontext,
+                        R.color.success
+                    )
+                )
                 status.setText(R.string.status_completed)
                 status.setTextColor(ContextCompat.getColor(mycontext, R.color.success))
             } else if (myMarker.status.id == 2 || myMarker.status.id == 3) {
-                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(ContextCompat.getColor(mycontext, R.color.warning))
+                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(
+                    ContextCompat.getColor(
+                        mycontext,
+                        R.color.warning
+                    )
+                )
                 status.setText(R.string.status_in_progress)
                 status.setTextColor(ContextCompat.getColor(mycontext, R.color.warning))
             } else if (myMarker.status.id == 4) {
-                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(ContextCompat.getColor(mycontext, R.color.danger))
+                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(
+                    ContextCompat.getColor(
+                        mycontext,
+                        R.color.danger
+                    )
+                )
                 status.setText(R.string.status_received)
                 status.setTextColor(ContextCompat.getColor(mycontext, R.color.danger))
             } else {
-                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(ContextCompat.getColor(mycontext, R.color.cpb_grey))
+                clusterItemView.findViewById<View>(R.id.number_color).setBackgroundColor(
+                    ContextCompat.getColor(
+                        mycontext,
+                        R.color.cpb_grey
+                    )
+                )
                 status.setText(R.string.status_error)
                 status.setTextColor(ContextCompat.getColor(mycontext, R.color.cpb_grey))
             }

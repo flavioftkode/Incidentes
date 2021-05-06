@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.location.Geocoder
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.*
@@ -15,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.fragment.app.Fragment
 import br.com.simplepass.loadingbutton.customViews.CircularProgressButton
-import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -398,18 +398,16 @@ class EventDetailFragment: Fragment(), OnMapReadyCallback {
         btnSave!!.isEnabled = true
         btnSave!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.error))
 
-        Handler().postDelayed(Runnable
-        {
-            btnSave!!.revertAnimation();
+        Handler(Looper.getMainLooper()).postDelayed({
             btnSave!!.setBackgroundResource(R.drawable.shape);
+            btnSave!!.revertAnimation();
         }, 10 * 100)
     }
 
     private fun success(back:Boolean,bundle:Bundle){
         btnSave!!.isEnabled = true
         btnSave!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.done))
-        Handler().postDelayed(Runnable
-        {
+        Handler(Looper.getMainLooper()).postDelayed({
             btnSave!!.revertAnimation();
             btnSave!!.setBackgroundResource(R.drawable.shape);
             if(back){
