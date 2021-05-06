@@ -69,10 +69,15 @@
     <string name="create_event">Register incident</string>
     <string name="no_login">Login is required to continue</string>
     <string name="consent_title">Consentiment</string>
-    <string name="consent_body">Message</string>
-    <string name="consent_checkbox_1">Concordo 1</string>
-    <string name="consent_checkbox_2">Concordo 2</string>
-    <string name="consent_needed">É necessario o seu consentimento para continuar</string>
+    <string name="consent_body">Visitors may post content as long as it is not obscene, illegal, defamatory, threatening, infringing of intellectual property rights, invasive of privacy or injurious in any other way to third parties. Content has to be free of software viruses, political campaign, and commercial solicitation.We reserve all rights (but not the obligation) to remove and/or edit such content. When you post your content, you grant [name] non-exclusive, royalty-free and irrevocable right to use, reproduce, publish, modify such content throughout the world in any media.
+    \n\n
+    If you are an owner of an account on this APP, you are solely responsible for maintaining the confidentiality of your private user details (username and password). You are responsible for all activities that occur under your account or password.
+
+    We reserve all rights to terminate accounts, edit or remove content and cancel incidents in their sole discretion.
+    </string>
+    <string name="consent_checkbox_1">I have read and accept the terms of use.</string>
+    <string name="consent_checkbox_2">I accept that my images are used for incident resolution purposes.</string>
+    <string name="consent_needed">Your consent is required to continue.</string>
 
     <!--Event detail fragment-->
     <string name="single_status">Status:</string>
@@ -118,6 +123,7 @@
     <string name="remove_event_body">Do you wish to cancel the current incident?</string>
     <string name="yes_remove">Confirm</string>
     <string name="no_remove">Cancel</string>
+    <string name="consent_btn">Continue</string>
 
     <string-array name="type_array">
         <item>Damage on road</item>

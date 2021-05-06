@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -63,8 +64,7 @@ class LoginFragment : Fragment() {
         btnLogin!!.isEnabled = true
         btnLogin!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.error))
 
-        Handler().postDelayed(Runnable
-        {
+        Handler(Looper.getMainLooper()).postDelayed({
             btnLogin!!.revertAnimation();
             btnLogin!!.setBackgroundResource(R.drawable.shape);
         }, 10 * 100)
@@ -74,8 +74,7 @@ class LoginFragment : Fragment() {
         btnLogin!!.isEnabled = true
         btnLogin!!.doneLoadingAnimation(R.color.transparent, BitmapFactory.decodeResource(resources, R.drawable.done))
 
-        Handler().postDelayed(Runnable
-        {
+        Handler(Looper.getMainLooper()).postDelayed({
             btnLogin!!.revertAnimation();
             btnLogin!!.setBackgroundResource(R.drawable.shape);
             (activity as NavigationHost).customToaster(title = getString(R.string.toast_success), message = getString(R.string.login_success), type = "success");
