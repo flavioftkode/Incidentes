@@ -783,6 +783,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     /*GET ALL MARKERS*/
     fun getMarkers(){
+        if (ActivityCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return
+        }
         val preferences: SharedPreferences = context!!.getSharedPreferences(
             "FILTERMAP",
             Context.MODE_PRIVATE
@@ -808,7 +812,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
             )
         }
-
         geofencingClient.addGeofences(buildGeofencingRequest(geofenceList[0]), geofencePendingIntent)
 
         val request = ServiceBuilder.buildService(EndPoints::class.java)
