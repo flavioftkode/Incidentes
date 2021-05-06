@@ -8,6 +8,8 @@
     <color name="textColorPrimary">#442C2E</color>
     <color name="textInputOutlineColor">#7CB342</color>
 
+    <color name="cpb_light_purple">#08E9D3FF</color>
+
     <color name="cpb_grey_light">#CFCFCF</color>
     <color name="cpb_grey">#818181</color>
     <color name="cpb_blue">#ff0099cc</color>
