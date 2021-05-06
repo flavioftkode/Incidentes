@@ -434,13 +434,13 @@ class HomeFragment : Fragment(), View.OnClickListener {
         val alertDialog = AlertDialog.Builder(
             context!!
         )
-        alertDialog.setTitle("titulo")
-        alertDialog.setMessage("body")
-        alertDialog.setPositiveButton("positive") { _, _ ->
+        alertDialog.setTitle(R.string.gps_dialog_title)
+        alertDialog.setMessage(R.string.gps_dialog_body)
+        alertDialog.setPositiveButton(R.string.gps_dialog_setting) { _, _ ->
             val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             activity!!.startActivity(intent)
         }
-        alertDialog.setNegativeButton("negative") { dialog, _ ->
+        alertDialog.setNegativeButton(R.string.gps_dialog_cancel) { dialog, _ ->
             dialog.cancel()
         }
         alertDialog.show()
@@ -640,14 +640,17 @@ class HomeFragment : Fragment(), View.OnClickListener {
         get() {
             mMapView!!.getMapAsync(object : OnMapReadyCallback {
                 override fun onMapReady(googleMap: GoogleMap) {
+                    if (ActivityCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return
+                    }
                     /* LatLng portugal = new LatLng( 39.477658, -8.141747);*/
                     val portugal = LatLng(38.7071159, -9.1639664)
                     clusterManager = ClusterManager(context, googleMap) // 3
                     clusterManagerAlgorithm = NonHierarchicalDistanceBasedAlgorithm<MyMarker>()
-
                     // Set this local algorithm in clusterManager
                     clusterManager!!.algorithm = clusterManagerAlgorithm as Algorithm<MyMarker?>
                     clusterManager!!.clearItems()
+                    /*Create a global polygon and add a hole to it*/
                     options = PolygonOptions()
                     options!!.addAll(points).fillColor(Color.argb(100, 60, 63, 65)).strokeWidth((0).toFloat()).strokeColor(Color.TRANSPARENT)
                     options!!.addHole(hole)
@@ -656,30 +659,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     googleMap.addPolygon(options)
                     googleMap.addPolygon(poly)
                     googleMap.isBuildingsEnabled = true
-                    if (ActivityCompat.checkSelfPermission(
-                            context!!,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                            context!!,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        return
-                    }
                     googleMap.isMyLocationEnabled = true
                     googleMap.uiSettings.isZoomControlsEnabled = true
                     googleMap.uiSettings.isMyLocationButtonEnabled = true
                     googleMap.uiSettings.isMapToolbarEnabled = false
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(portugal, 14.3f))
                     mMap = googleMap
-                    mMap!!.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_in_day
-                        )
-                    );
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
                     setUpClusterManager()
                     mMap!!.setOnMapClickListener { point ->
+                        /*Validate if point is inside geofence*/
                         if (PolyUtil.containsLocation(point, hole, true)) {
                             if (mMarker != null) {
                                 mMarker!!.remove()
@@ -718,6 +707,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         override fun onMarkerDragStart(marker: Marker?) {}
                         override fun onMarkerDrag(marker: Marker?) {}
                         override fun onMarkerDragEnd(marker: Marker) {
+                            /*Validate if point is inside hole on drag end*/
                             if (PolyUtil.containsLocation(marker.position, hole, true)) {
                                 mMap!!.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
                                 mMarker = marker
@@ -748,9 +738,6 @@ class HomeFragment : Fragment(), View.OnClickListener {
                             }
                         }
                     })
-                    /*mMap!!.setOnCameraChangeListener { camera ->
-                        Log.e("zoom", camera.zoom.toString())
-                    }*/
 
                     mMap!!.setOnCameraMoveStartedListener {
                         val preferences: SharedPreferences = context!!.getSharedPreferences("MAPZOOM", Context.MODE_PRIVATE)
@@ -758,12 +745,11 @@ class HomeFragment : Fragment(), View.OnClickListener {
                         editor.putFloat("zoom", mMap!!.cameraPosition.zoom)
                         editor.apply()
                     }
-
-                    /*map_loading.visibility = View.GONE;*/
                 }
             })
         }
 
+    /*GET ALL MARKERS TO CLUSTER*/
     private fun setUpClusterManager() {
         if (myMarkers.isEmpty()) {
             if(!refresh_home!!.isRefreshing){
@@ -783,6 +769,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     /*GET ALL MARKERS*/
     fun getMarkers(){
+        if (ActivityCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        /*Filter by filter active*/
         val preferences: SharedPreferences = context!!.getSharedPreferences(
             "FILTERMAP",
             Context.MODE_PRIVATE
@@ -801,16 +791,10 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
         if(mMarker != null){
             mMarker!!.remove()
-            mMarker = mMap!!.addMarker(
-                MarkerOptions()
-                    .position(LatLng(mMarker!!.position.latitude, mMarker!!.position.longitude))
-                    .draggable(true)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
-            )
+            mMarker = mMap!!.addMarker(MarkerOptions().position(LatLng(mMarker!!.position.latitude, mMarker!!.position.longitude)).draggable(true).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker)))
         }
-
         geofencingClient.addGeofences(buildGeofencingRequest(geofenceList[0]), geofencePendingIntent)
-
+        /*GET ALL EVENTS (Markers)*/
         val request = ServiceBuilder.buildService(EndPoints::class.java)
         val call = request.getCluster(payload)
 
@@ -856,7 +840,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                                 type = it.type
                             )
 
-
+                            /*Filter by radius*/
                             if (radius != 0) {
                                 val locationA = Location("me")
 
@@ -883,12 +867,8 @@ class HomeFragment : Fragment(), View.OnClickListener {
                     } catch (e: Exception) {
                         Log.e("catch", e.toString())
                     }
-
-                    clusterManager!!.renderer = MarkerClusterRenderer(
-                        context!!,
-                        mMap!!,
-                        clusterManager!!
-                    )
+                    /*SETUP CLUSTER MANAGER*/
+                    clusterManager!!.renderer = MarkerClusterRenderer(context!!, mMap!!, clusterManager!!)
                     mMap!!.setOnCameraIdleListener(clusterManager)
                     clusterManager!!.clearItems()
                     clusterManager!!.addItems(myMarkers as Collection<MyMarker?>?) // 4
@@ -920,6 +900,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     private val myLocation: LatLng
         get() {
+            /*ENABLE LOCATION UPDATES*/
             gps = GPSTracker2(context!!)
             return LatLng(gps!!.getLatitude(), gps!!.getLongitude())
         }
@@ -928,6 +909,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
 
     companion object {
         var eventCounter = 0
+        /*CHECK LOCATION*/
         private fun isLocationEnabled(context: Context?): Boolean {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val lm = context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -945,28 +927,16 @@ class HomeFragment : Fragment(), View.OnClickListener {
     private val lightSensorListener: SensorEventListener = object : SensorEventListener {
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
             Log.e("onAccuracyChanged", "onAccuracyChanged")
-            if (sensor.type == Sensor.TYPE_LIGHT) {
-
-            }
+            if (sensor.type == Sensor.TYPE_LIGHT) { }
         }
 
         override fun onSensorChanged(event: SensorEvent) {
-            Log.e("onSensorChanged", "onSensorChanged")
+            /*ON SENSOR CHANGE SWITCH BETWEEN DARK AND LIGHT MODE DEPENDING ON LIGHT*/
             if (event.sensor.type == Sensor.TYPE_LIGHT) {
-                if(event!!.values[0] < 20000.0){
-                    mMap!!.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_in_night
-                        )
-                    );
+                if(event.values[0] < 20000.0){
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_night));
                 }else{
-                    mMap!!.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_in_day
-                        )
-                    );
+                    mMap!!.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_in_day));
                 }
             }
         }
