@@ -224,7 +224,7 @@ class HomeFragment : Fragment(), View.OnClickListener {
                 4000f
             )
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-            .setExpirationDuration(1000000)
+            .setExpirationDuration(100000)
             .build())
 
     }
